@@ -14,16 +14,7 @@ traits_info = {
         ),
         "inheritance": "dominant"
     },
-    "Dimples": {
-        "gene": None,
-        "snps": [],
-        "description": (
-            "Dimples are small indentations on the cheeks when smiling. "
-            "Though widely considered dominant, multiple genes likely contribute "
-            "and the precise variants remain undefined."
-        ),
-        "inheritance": "dominant"
-    },
+    
     "Red-Green Colourblindness": {
         "gene": "OPN1LW",
         "snps": ["rs104894"],  # placeholder rsID for demonstration
@@ -54,15 +45,7 @@ traits_info = {
         ),
         "inheritance": "recessive"
     },
-    "Height": {
-        "gene": None,
-        "snps": [],
-        "description": (
-            "Height is polygenic. "
-            "A simple estimate uses mid-parental height adjusted by child’s sex."
-        ),
-        "inheritance": None
-    },
+   
     "Skin Tone": {
         "gene": "SLC24A5",
         "snps": ["rs1426654"],
