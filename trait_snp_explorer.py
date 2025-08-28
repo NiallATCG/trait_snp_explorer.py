@@ -49,14 +49,25 @@ traits_info = {
     # Add other traits here…
 }
 
-# 2. Mock genotype data for mother/father (0 = REF, 1 = ALT)
+# Mock SNP data for testing (0 = REF allele, 1 = ALT allele)
 mock_vcf_data = {
-    "rs1805007": {"mother": [0, 1], "father": [1, 1]},
-    "rs1805008": {"mother": [0, 0], "father": [0, 1]},
-    "rs12913832": {"mother": [0, 0], "father": [0, 1]},
-    "rs4988235": {"mother": [1, 1], "father": [0, 1]},
-    "rs1815739": {"mother": [0, 0], "father": [1, 1]},
+    # Visual Traits
+    "rs1805007": {"mother": [0, 1], "father": [1, 1]},   # MC1R – Freckles (Arg151Cys)
+    "rs1805008": {"mother": [0, 0], "father": [0, 1]},   # MC1R – Freckles (Arg160Trp)
+    "rs104894":  {"mother": [0, 1], "father": [0, 0]},   # OPN1LW – Red/Green colourblindness
+    "rs12913832":{"mother": [0, 0], "father": [0, 1]},   # HERC2 – Eye colour
+    # Hair colour – can reuse MC1R variants if desired
+    "rs1426654": {"mother": [1, 0], "father": [0, 0]},   # SLC24A5 – Skin tone
+    "rs17822931":{"mother": [1, 1], "father": [0, 1]},   # ABCC11 – Earwax type
+    # Lifestyle Traits
+    "rs4988235": {"mother": [1, 1], "father": [0, 1]},   # MCM6 – Lactose intolerance
+    "rs713598": {"mother": [0, 1], "father": [1, 1]},    # TAS2R38 – PTC tasting
+    "rs1726866": {"mother": [0, 0], "father": [1, 0]},   # TAS2R38 – PTC tasting
+    "rs72921001":{"mother": [1, 0], "father": [1, 1]},   # OR6A2 – Coriander taste
+    "rs1815739":{"mother": [0, 0], "father": [1, 1]},    # ACTN3 – Sprint gene
+    "rs671":     {"mother": [0, 1], "father": [0, 0]}     # ALDH2 – Alcohol flush
 }
+
 
 # Helper functions
 def zygosity(gt):
