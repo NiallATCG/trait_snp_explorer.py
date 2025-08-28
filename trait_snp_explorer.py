@@ -7,11 +7,41 @@ traits_info = {
         "gene": "MC1R",
         "snps": ["rs1805007", "rs1805008"],
         "description": (
-            "MC1R encodes the melanocortin-1 receptor, which regulates the switch "
-            "between eumelanin (brown/black) and pheomelanin (red/yellow). Variants "
-            "rs1805007 (Arg151Cys) and rs1805008 (Arg160Trp) are associated with "
-            "increased freckling. Heterozygotes often have mild freckling, while "
-            "homozygous carriers display pronounced freckling."
+            "MC1R encodes the melanocortin-1 receptor, which switches between "
+            "eumelanin (brown/black) and pheomelanin (red/yellow). Variants "
+            "rs1805007 (Arg151Cys) and rs1805008 (Arg160Trp) increase freckling. "
+            "Heterozygotes often have mild freckling; homozygotes show pronounced freckling."
+        ),
+        "inheritance": "dominant"
+    },
+    "Dimples": {
+        "gene": None,
+        "snps": [],
+        "description": (
+            "Dimples are small indentations on the cheeks when smiling. "
+            "Though widely considered dominant, multiple genes likely contribute "
+            "and the precise variants remain undefined."
+        ),
+        "inheritance": "dominant"
+    },
+    "Red-Green Colourblindness": {
+        "gene": "OPN1LW",
+        "snps": ["rs104894"],  # placeholder rsID for demonstration
+        "description": (
+            "Red-green colour vision defects arise from mutations in the "
+            "OPN1LW/OPN1MW opsin genes on the X chromosome. "
+            "X-linked recessive inheritance makes males more susceptible; "
+            "females require two mutated copies."
+        ),
+        "inheritance": "recessive"
+    },
+    "Hair Colour": {
+        "gene": "MC1R",
+        "snps": ["rs1805007", "rs1805008"],
+        "description": (
+            "MC1R variants influence hair pigmentation. "
+            "Alternate alleles at rs1805007/rs1805008 associate with red hair. "
+            "Heterozygotes may show auburn shades; homozygotes often have true red hair."
         ),
         "inheritance": "dominant"
     },
@@ -19,19 +49,64 @@ traits_info = {
         "gene": "HERC2",
         "snps": ["rs12913832"],
         "description": (
-            "HERC2 regulates OCA2 expression, influencing melanin in the iris. "
-            "At rs12913832, the G allele reduces OCA2 activity and is associated with blue eyes "
-            "(recessive), whereas the A allele leads to brown eyes (dominant)."
+            "HERC2 regulates OCA2 expression, affecting iris melanin. "
+            "At rs12913832, G/G is blue (recessive), A/A or A/G yields brown (dominant)."
         ),
         "inheritance": "recessive"
+    },
+    "Height": {
+        "gene": None,
+        "snps": [],
+        "description": (
+            "Height is polygenic. "
+            "A simple estimate uses mid-parental height adjusted by child’s sex."
+        ),
+        "inheritance": None
+    },
+    "Skin Tone": {
+        "gene": "SLC24A5",
+        "snps": ["rs1426654"],
+        "description": (
+            "SLC24A5 variant rs1426654 A allele is associated with lighter skin tone. "
+            "Recessive inheritance: A/A yields lighter pigmentation."
+        ),
+        "inheritance": "recessive"
+    },
+    "Earwax Type": {
+        "gene": "ABCC11",
+        "snps": ["rs17822931"],
+        "description": (
+            "ABCC11 variant rs17822931 G→A determines earwax: "
+            "G allele yields wet earwax (dominant); A/A gives dry earwax (recessive)."
+        ),
+        "inheritance": "dominant"
     },
     "Lactose Intolerance": {
         "gene": "MCM6",
         "snps": ["rs4988235"],
         "description": (
-            "Variants in the MCM6 enhancer (rs4988235 C→T) control lactase gene persistence. "
-            "The T allele maintains lactase into adulthood (dominant); homozygous CC "
-            "individuals typically lose lactase activity and are lactose intolerant."
+            "The MCM6 enhancer variant rs4988235 T allele maintains lactase "
+            "into adulthood (dominant). C/C homozygotes lose lactase activity."
+        ),
+        "inheritance": "dominant"
+    },
+    "PTC Tasting": {
+        "gene": "TAS2R38",
+        "snps": ["rs713598", "rs1726866"],
+        "description": (
+            "TAS2R38 variants at rs713598 and rs1726866 determine "
+            "ability to taste bitter PTC. PAV haplotype (taster) is dominant "
+            "over AVI (non-taster)."
+        ),
+        "inheritance": "dominant"
+    },
+    "Coriander Taste": {
+        "gene": "OR6A2",
+        "snps": ["rs72921001"],
+        "description": (
+            "OR6A2 encodes a receptor responding to aldehydes in coriander. "
+            "The C allele at rs72921001 associates with soapy flavour perception. "
+            "Dominant inheritance: one copy often sufficient."
         ),
         "inheritance": "dominant"
     },
@@ -40,13 +115,20 @@ traits_info = {
         "snps": ["rs1815739"],
         "description": (
             "ACTN3 encodes α-actinin-3 in fast-twitch muscle fibres. "
-            "The rs1815739 T allele introduces a stop codon, leading to deficiency. "
-            "CC or CT genotypes have normal sprint performance (dominant), while "
-            "TT homozygotes lack α-actinin-3."
+            "The T allele (stop codon) leads to deficiency. CC or CT genotypes "
+            "(normal) are dominant over TT."
         ),
         "inheritance": "dominant"
     },
-    # Add other traits here…
+    "Alcohol Flush": {
+        "gene": "ALDH2",
+        "snps": ["rs671"],
+        "description": (
+            "ALDH2 variant rs671 A allele reduces enzyme activity, causing alcohol flush. "
+            "A allele is semi-dominant; heterozygotes flush moderately, A/A flush strongly."
+        ),
+        "inheritance": "dominant"
+    }
 }
 
 # Mock SNP data for testing (0 = REF allele, 1 = ALT allele)
