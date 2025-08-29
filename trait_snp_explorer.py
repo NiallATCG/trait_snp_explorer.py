@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import requests
+from cyvcf2 import VCF
 
 st.set_page_config(page_title="Phenome Query", layout="wide")
 
@@ -24,8 +25,8 @@ traits_info = {
         "gene": "OPN1LW",
         "snps": ["rs104894"],
         "description": (
-            "Mutations in OPN1LW/OPN1MW on the X chromosome cause red-green colour vision defects. "
-            "Males (XY) need only one mutated copy; females (XX) require two copies."
+            "Mutations in OPN1LW/OPN1MW on the X chromosome cause red-green colour defects. "
+            "Males (XY) need a single variant; females (XX) require two copies."
         ),
         "inheritance": "recessive"
     },
@@ -33,19 +34,24 @@ traits_info = {
         "gene": "MC1R",
         "snps": ["rs1805007", "rs1805008"],
         "description": (
-            "MC1R variants influence hair pigmentation. ALT alleles at "
-            "rs1805007/rs1805008 associate with red hair. Heterozygotes may have "
-            "auburn shades; homozygotes often present true red hair."
+            "MC1R variants at rs1805007/rs1805008 reduce eumelanin, boosting pheomelanin. "
+            "Heterozygotes often have auburn hair; homozygotes typically have true red hair."
         ),
-        "inheritance": "dominant"
+        "inheritance": "dominant",
+        "interpretation": {
+            "text": (
+                "Variants in MC1R at rs1805007 and rs1805008 reduce the receptor's ability "
+                "to stimulate brown-black pigment (eumelanin), leading to more red-yellow pigment (pheomelanin). "
+                "Heterozygotes may have auburn hair; homozygotes are more likely to have true red hair."
+            )
+        }
     },
     "Eye Colour": {
         "gene": "HERC2",
         "snps": ["rs12913832"],
         "description": (
             "HERC2 regulates OCA2 expression, affecting iris melanin. "
-            "G/G at rs12913832 yields blue eyes (recessive); A/A or A/G yields "
-            "brown eyes (dominant)."
+            "G/G at rs12913832 yields blue eyes (recessive); A/A or A/G yields brown eyes (dominant)."
         ),
         "inheritance": "recessive"
     },
@@ -53,8 +59,8 @@ traits_info = {
         "gene": None,
         "snps": [],
         "description": (
-            "Height is highly polygenic. A rough estimate uses mid-parental height "
-            "adjusted for the sex of the child."
+            "Height is highly polygenic. A mid-parental estimate uses parental heights "
+            "adjusted by child sex."
         ),
         "inheritance": None
     },
@@ -71,7 +77,7 @@ traits_info = {
         "gene": "ABCC11",
         "snps": ["rs17822931"],
         "description": (
-            "ABCC11 rs17822931 G→A determines earwax: G allele → wet earwax (dominant); "
+            "ABCC11 rs17822931 G→A determines earwax type: G allele → wet earwax (dominant); "
             "A/A → dry earwax (recessive)."
         ),
         "inheritance": "dominant"
@@ -80,8 +86,8 @@ traits_info = {
         "gene": "MCM6",
         "snps": ["rs4988235"],
         "description": (
-            "MCM6 enhancer variant rs4988235 T allele maintains lactase production "
-            "into adulthood (dominant); C/C homozygotes are lactose intolerant."
+            "MCM6 enhancer rs4988235 T allele maintains lactase into adulthood (dominant); "
+            "C/C homozygotes are lactose intolerant."
         ),
         "inheritance": "dominant"
     },
@@ -99,7 +105,7 @@ traits_info = {
         "snps": ["rs72921001"],
         "description": (
             "OR6A2 encodes a receptor responding to aldehydes in coriander. "
-            "C allele at rs72921001 associates with soapy flavour perception (dominant)."
+            "C allele at rs72921001 associates with soapy flavour (dominant)."
         ),
         "inheritance": "dominant"
     },
@@ -107,7 +113,7 @@ traits_info = {
         "gene": "ACTN3",
         "snps": ["rs1815739"],
         "description": (
-            "ACTN3 encodes α-actinin-3 in fast-twitch muscle fibres. "
+            "ACTN3 encodes α-actinin-3 in fast-twitch fibres. "
             "T allele introduces a stop codon; CC/CT genotypes (normal) are dominant over TT."
         ),
         "inheritance": "dominant"
@@ -125,198 +131,229 @@ traits_info = {
 
 # 2. Mock genotype data
 mock_vcf_data = {
-    "rs1805007": {"ref":"C","alt":"T","mother":[0,1],"father":[1,1]},
-    "rs1805008": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1]},
-    "rs104894":  {"ref":"A","alt":"G","mother":[0,1],"father":[0,0]},
-    "rs12913832":{"ref":"A","alt":"G","mother":[0,0],"father":[0,1]},
-    "rs1426654": {"ref":"G","alt":"A","mother":[1,0],"father":[0,0]},
-    "rs17822931":{"ref":"G","alt":"A","mother":[1,1],"father":[0,1]},
-    "rs4988235": {"ref":"C","alt":"T","mother":[1,1],"father":[0,1]},
-    "rs713598": {"ref":"C","alt":"G","mother":[0,1],"father":[1,1]},
-    "rs1726866": {"ref":"T","alt":"C","mother":[0,0],"father":[1,0]},
-    "rs72921001":{"ref":"T","alt":"C","mother":[1,0],"father":[1,1]},
-    "rs1815739":{"ref":"C","alt":"T","mother":[0,0],"father":[1,1]},
-    "rs671":     {"ref":"G","alt":"A","mother":[0,1],"father":[0,0]},
+    "rs1805007": {"ref":"C","alt":"T","gt":[1,1]},  # mock male
+    "rs1805008": {"ref":"G","alt":"A","gt":[0,1]},
+    "rs104894":  {"ref":"A","alt":"G","gt":[0,1]},
+    "rs12913832":{"ref":"A","alt":"G","gt":[0,1]},
+    "rs1426654": {"ref":"G","alt":"A","gt":[1,0]},
+    "rs17822931":{"ref":"G","alt":"A","gt":[1,1]},
+    "rs4988235": {"ref":"C","alt":"T","gt":[1,1]},
+    "rs713598": {"ref":"C","alt":"G","gt":[0,1]},
+    "rs1726866": {"ref":"T","alt":"C","gt":[0,0]},
+    "rs72921001":{"ref":"T","alt":"C","gt":[1,1]},
+    "rs1815739":{"ref":"C","alt":"T","gt":[1,1]},
+    "rs671":     {"ref":"G","alt":"A","gt":[0,1]},
 }
 
 # 3. Annotation fetchers
 @st.cache_data(ttl=24*3600)
-def fetch_clinvar_annotation(rsid):
+def fetch_clinvar(rsid):
     rid = rsid.lstrip("rs")
     url = f"https://api.ncbi.nlm.nih.gov/variation/v0/beta/refsnp/{rid}"
-    r = requests.get(url, headers={"Accept":"application/json"})
+    r = requests.get(url)
     if not r.ok:
-        return {"clinical_significance":"Unavailable"}
+        return "Unavailable"
     data = r.json()
-    cs = set()
-    for anno in data.get("primary_snapshot_data", {}).get("allele_annotations", []):
-        for term in anno.get("clinical_significances", []):
-            cs.add(term)
-    return {"clinical_significance": ", ".join(cs) if cs else "Not reported"}
+    cs = {
+        term
+        for anno in data.get("primary_snapshot_data", {}).get("allele_annotations", [])
+        for term in anno.get("clinical_significances", [])
+    }
+    return ", ".join(cs) or "Not reported"
 
 @st.cache_data(ttl=24*3600)
-def fetch_gnomad_freq(rsid):
+def fetch_gnomad(rsid):
     server = "https://gnomad.broadinstitute.org/api"
     query = """
-    query($variantId: String!) {
-      variant(variantId: $variantId) {
-        genome {
-          ac
-          an
-          populations {
-            id
-            ac
-            an
-          }
-        }
+    query($id: String!) {
+      variant(variantId: $id) {
+        genome { ac an populations { id ac an } }
       }
     }"""
-    vars = {"variantId": rsid}
-    r = requests.post(server, json={"query": query, "variables": vars})
+    r = requests.post(server, json={"query": query, "variables": {"id": rsid}})
     if not r.ok:
-        return {"global_af": None, "populations": {}}
+        return None, {}
     v = r.json()["data"]["variant"]["genome"]
     if not v or v["an"] == 0:
-        return {"global_af": None, "populations": {}}
+        return None, {}
     global_af = v["ac"] / v["an"]
-    pop_af = {pop["id"]: pop["ac"]/pop["an"]
-              for pop in v["populations"] if pop["an"] > 0}
-    return {"global_af": global_af, "populations": pop_af}
+    pops = {
+        pop["id"]: pop["ac"] / pop["an"]
+        for pop in v["populations"] if pop["an"] > 0
+    }
+    return global_af, pops
 
-# 4. Helper functions
-def zygosity(gt):
-    return "Homozygous" if gt[0]==gt[1] else "Heterozygous"
-
-def alleles_from_gt(gt, ref, alt):
-    return "/".join(ref if a==0 else alt for a in gt)
-
-def display_genotype(gt, ref, alt):
-    return f"{gt[0]}/{gt[1]}", alleles_from_gt(gt, ref, alt)
-
-def trait_present(gt, inh):
+# 4. Helpers
+def zygosity(gt): return "Homozygous" if gt[0]==gt[1] else "Heterozygous"
+def alleles(gt, ref, alt): return "/".join(ref if a==0 else alt for a in gt)
+def display(gt, ref, alt): return f"{gt[0]}/{gt[1]}", alleles(gt, ref, alt)
+def present(gt, inh):
     if inh=="dominant": return any(a==1 for a in gt)
     if inh=="recessive": return gt[0]==1 and gt[1]==1
     return None
-
-def format_presence(gt, inh):
-    pres = trait_present(gt, inh)
-    if pres is None:
-        return "", ""
-    return ("Trait present", f"({inh})") if pres else ("Trait absent", "")
-
-def child_genotype_probs(m_gt, f_gt):
-    combos = [(m,f) for m in m_gt for f in f_gt]
-    counts = Counter(tuple(sorted(c)) for c in combos)
+def fmt_presence(gt, inh):
+    p = present(gt, inh)
+    if p is None: return "", ""
+    return ("Trait present","("+inh+")") if p else ("Trait absent","")
+def child_probs(m, f):
+    combos = [(mi, fi) for mi in m for fi in f]
+    cnt = Counter(tuple(sorted(c)) for c in combos)
     total = len(combos)
     out = []
-    for geno, cnt in sorted(counts.items()):
-        pct = cnt/total*100
-        zyg = "Homozygous" if geno[0]==geno[1] else "Heterozygous"
-        out.append({"geno": geno, "pct": pct, "zygosity": zyg})
+    for geno, c in sorted(cnt.items()):
+        pct = c/total*100
+        zog = "Homozygous" if geno[0]==geno[1] else "Heterozygous"
+        out.append({"geno":geno,"pct":pct,"zygosity":zog})
     return out
-
-def estimate_child_height(mom_cm, dad_cm, sex):
-    return (mom_cm + dad_cm + (13 if sex=="Male" else -13)) / 2
+def midparent(m, f, sex):
+    return (m + f + (13 if sex=="Male" else -13)) / 2
+def cm_to_ftin(cm):
+    inches = cm/2.54
+    ft = int(inches//12)
+    inch = int(round(inches%12))
+    return ft, inch
 
 # 5. UI
 st.title("Phenome Query: Enhanced Trait-Based SNP Explorer")
-page = st.sidebar.radio("Navigate to:", ["Individual", "Child Phenome Predictor"])
+page = st.sidebar.radio("Navigate:", ["Individual","Child Phenome Predictor"])
+
+# Data upload
+st.sidebar.subheader("Data Upload")
+if page=="Individual":
+    vcf_file = st.sidebar.file_uploader("Upload VCF (individual)", type=["vcf","vcf.gz"])
+    sample_id = None
+    if vcf_file:
+        vcf = VCF(vcf_file)
+        sample_id = st.sidebar.selectbox("Select sample", vcf.samples)
+else:
+    vcf_m = st.sidebar.file_uploader("Upload VCF (mother)", type=["vcf","vcf.gz"])
+    vcf_f = st.sidebar.file_uploader("Upload VCF (father)", type=["vcf","vcf.gz"])
+    mom_id = dad_id = None
+    if vcf_m:
+        vcfM = VCF(vcf_m)
+        mom_id = st.sidebar.selectbox("Select mother sample", vcfM.samples)
+    if vcf_f:
+        vcfF = VCF(vcf_f)
+        dad_id = st.sidebar.selectbox("Select father sample", vcfF.samples)
+
+# Trait selection
 selected = st.multiselect("Select traits:", list(traits_info.keys()))
 
-# Height calculator on predictor page
+# Height on predictor page
 if page=="Child Phenome Predictor" and "Height" in selected:
     st.subheader("Height Calculator")
-    col1, col2 = st.columns(2)
-    with col1:
+    c1, c2 = st.columns(2)
+    with c1:
         mom_cm = st.slider("Mother’s height (cm):", 140, 200, 165)
         dad_cm = st.slider("Father’s height (cm):", 140, 200, 180)
-    with col2:
-        def cm_to_ftin(cm):
-            total_inches = cm / 2.54
-            ft = int(total_inches // 12)
-            inch = int(round(total_inches % 12))
-            return ft, inch
-        mft, minch = cm_to_ftin(mom_cm)
-        dft, dinch = cm_to_ftin(dad_cm)
-        st.write(f"Mother: {mft} ft {minch} in")
-        st.write(f"Father: {dft} ft {dinch} in")
-    sex = st.selectbox("Child’s sex:", ["Male", "Female"])
-    mean_h = estimate_child_height(mom_cm, dad_cm, sex)
-    sigma = 4.7  # cm, real‐world SD around mid‐parental
+    with c2:
+        st.write(f"Mother: {cm_to_ftin(mom_cm)[0]} ft {cm_to_ftin(mom_cm)[1]} in")
+        st.write(f"Father: {cm_to_ftin(dad_cm)[0]} ft {cm_to_ftin(dad_cm)[1]} in")
+    sex = st.selectbox("Child’s sex:", ["Male","Female"])
+    mean_h = midparent(mom_cm, dad_cm, sex)
+    sigma = 4.7
     low, high = mean_h - 1.96*sigma, mean_h + 1.96*sigma
-    lft, lin = cm_to_ftin(low)
-    hft, hin = cm_to_ftin(high)
-    st.markdown(f"**Predicted child height:** {mean_h:.1f} cm  ")
-    st.markdown(f"_95% interval:_ {low:.1f}–{high:.1f} cm  ")
-    st.markdown(f"_Which is ~ {lft} ft {lin} in  to  {hft} ft {hin} in_")
-
-    sims = np.random.normal(loc=mean_h, scale=sigma, size=3000)
+    lft, lin = cm_to_ftin(low); hft, hin = cm_to_ftin(high)
+    st.markdown(f"**Predicted height**: {mean_h:.1f} cm ({lft} ft {lin} in)")
+    st.markdown(f"_95% interval_: {low:.1f}–{high:.1f} cm (~{lft} ft {lin} in to {hft} ft {hin} in)")
+    sims = np.random.normal(mean_h, sigma, 3000)
     df = pd.DataFrame({"Height (cm)": sims})
     chart = alt.Chart(df).mark_area(opacity=0.4).encode(
         alt.X("Height (cm):Q", bin=alt.Bin(maxbins=60)),
-        alt.Y('count()', stack=None)
+        alt.Y("count()", stack=None)
     ).properties(height=250, width=600)
     st.altair_chart(chart)
     st.markdown("---")
 
-# Loop through traits
+# Loop traits
 for trait in selected:
-    # hide height on Individual page
     if page=="Individual" and trait=="Height":
         continue
 
     info = traits_info[trait]
     with st.expander(trait, expanded=True):
-        # Trait Gene Summary
+        # Summary
         st.subheader("Trait Gene Summary")
         if info["gene"]:
             st.write(f"**Gene**: {info['gene']}")
         st.write(info["description"])
 
-        # SNP Genotypes & Inheritance
+        # Interpret hair colour
+        if trait=="Hair Colour":
+            st.subheader("Trait Interpretation")
+            st.write(info["interpretation"]["text"])
+
+        # Genotype display
         if info["snps"]:
-            st.subheader("SNP Genotypes & Inheritance")
+            st.subheader("Genotypes & Inheritance")
             for snp in info["snps"]:
-                data = mock_vcf_data.get(snp)
-                if not data:
-                    st.write(f"- {snp}: no mock data")
-                    continue
-
-                ref, alt = data["ref"], data["alt"]
-                m_gt, f_gt = data["mother"], data["father"]
-                m_bin, m_alleles = display_genotype(m_gt, ref, alt)
-                f_bin, f_alleles = display_genotype(f_gt, ref, alt)
-                m_zyg, f_zyg = zygosity(m_gt), zygosity(f_gt)
-                m_pres, m_mode = format_presence(m_gt, info["inheritance"])
-                f_pres, f_mode = format_presence(f_gt, info["inheritance"])
-
-                st.markdown(f"**SNP**: {snp} (REF={ref}, ALT={alt})")
-                st.write(f"- Mother: {m_bin} → {m_alleles}, {m_zyg}, {m_pres} {m_mode}")
-                st.write(f"- Father: {f_bin} → {f_alleles}, {f_zyg}, {f_pres} {f_mode}")
-
-                # Annotations
-                with st.expander("Annotations", expanded=False):
-                    clin = fetch_clinvar_annotation(snp)
-                    st.write(f"- ClinVar significance: {clin['clinical_significance']}")
-                    gnomad = fetch_gnomad_freq(snp)
-                    if gnomad["global_af"] is not None:
-                        st.write(f"- gnomAD global AF: {gnomad['global_af']:.4f}")
-                        for pop, af in gnomad["populations"].items():
-                            st.write(f"  - {pop}: {af:.4f}")
+                # load real or mock
+                if page=="Individual":
+                    if sample_id:
+                        v = VCF(vcf_file)(f"{snp}")
+                        rec = next(v, None)
+                        gt = rec.genotype(sample_id)["GT"]
+                        ref, alt = rec.REF, rec.ALT[0]
                     else:
-                        st.write("- gnomAD frequency unavailable")
-
-                # Child probabilities
-                if page=="Child Phenome Predictor":
-                    st.write("**Predicted Child Genotype Probabilities**")
-                    for p in child_genotype_probs(m_gt, f_gt):
-                        c_bin = f"{p['geno'][0]}/{p['geno'][1]}"
-                        c_alleles = alleles_from_gt(list(p["geno"]), ref, alt)
-                        c_pres, c_mode = format_presence(p["geno"], info["inheritance"])
-                        st.write(
-                            f"- {c_bin} ({c_alleles}): {p['pct']:.0f}% → "
-                            f"{p['zygosity']}, {c_pres} {c_mode}"
-                        )
+                        data = mock_vcf_data[snp]
+                        gt, ref, alt = data["gt"], data["ref"], data["alt"]
+                    b, a = display(gt, ref, alt)
+                    pres, mode = fmt_presence(gt, info["inheritance"])
+                    st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
+                    st.write(f"- Genotype: {b} → {a}, {zygosity(gt)}, {pres} {mode}")
+                    # hair interpretation
+                    if trait=="Hair Colour":
+                        if any(gt.count(1) > 1 for _ in []): pass
+                        cnt_alt = gt.count(1)
+                        result = "True red hair" if cnt_alt==2 else ("Auburn hair" if cnt_alt==1 else "Non-red hair")
+                        st.write(f"**Interpretation:** {result}")
+                else:
+                    # predictor page
+                    # mother
+                    if mom_id:
+                        recM = next(VCF(vcf_m)(f"{snp}"), None)
+                        m_gt = recM.genotype(mom_id)["GT"]; m_ref, m_alt = recM.REF, recM.ALT[0]
+                    else:
+                        d = mock_vcf_data[snp]; m_gt, m_ref, m_alt = d["mother"], d["ref"], d["alt"]
+                    # father
+                    if dad_id:
+                        recF = next(VCF(vcf_f)(f"{snp}"), None)
+                        f_gt = recF.genotype(dad_id)["GT"]; f_ref, f_alt = recF.REF, recF.ALT[0]
+                    else:
+                        d = mock_vcf_data[snp]; f_gt = d["father"]; f_ref, f_alt = d["ref"], d["alt"]
+                    # display
+                    st.markdown(f"**{snp}** (REF={m_ref}, ALT={m_alt})")
+                    for label, gt, ref, alt in [
+                        ("Mother", m_gt, m_ref, m_alt),
+                        ("Father", f_gt, f_ref, f_alt),
+                    ]:
+                        b, a = display(gt, ref, alt)
+                        pres, mode = fmt_presence(gt, info["inheritance"])
+                        st.write(f"- {label}: {b} → {a}, {zygosity(gt)}, {pres} {mode}")
+                    # annotations
+                    with st.expander("Annotations", expanded=False):
+                        cv = fetch_clinvar(snp)
+                        st.write(f"- ClinVar: {cv}")
+                        gaf, pops = fetch_gnomad(snp)
+                        if gaf is not None:
+                            st.write(f"- gnomAD AF: {gaf:.4f}")
+                            for pop, af in pops.items():
+                                st.write(f"  - {pop}: {af:.4f}")
+                        else:
+                            st.write("- gnomAD unavailable")
+                    # child probabilities
+                    st.subheader("Predicted Child Genotype Probabilities")
+                    for p in child_probs(m_gt, f_gt):
+                        cb = f"{p['geno'][0]}/{p['geno'][1]}"
+                        ca = alleles(p["geno"], m_ref, m_alt)
+                        pres, mode = fmt_presence(p["geno"], info["inheritance"])
+                        st.write(f"- {cb} ({ca}): {p['pct']:.0f}% → {p['zygosity']}, {pres} {mode}")
+                    # hair interpretation for child
+                    if trait=="Hair Colour":
+                        best = max(child_probs(m_gt, f_gt), key=lambda x: x["pct"])
+                        cnt_alt = list(best["geno"]).count(1)
+                        result = "True red hair" if cnt_alt==2 else ("Auburn hair" if cnt_alt==1 else "Non-red hair")
+                        st.write(f"**Child hair interpretation:** {result}")
                 st.markdown("---")
         else:
             st.write("_No defined SNPs for this trait._")
