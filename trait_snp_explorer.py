@@ -12,7 +12,7 @@ sample_ind, sample_mom, sample_dad = None, None, None
 try:
     from cyvcf2 import VCF
 except ImportError:
-    VCF = None  # fallback to mock
+    VCF = None
 
 st.set_page_config(page_title="Phenome Query", layout="wide")
 
@@ -237,10 +237,6 @@ def cm_to_ftin(cm):
     return ft, inch
 
 def get_genotype(rsid, role):
-    """
-    role: "ind", "mom", or "dad"
-    Returns: (gt_list, ref, alt)
-    """
     if use_real_vcf and VCF:
         vobj, samp = {
             "ind": (vcf_ind, sample_ind),
@@ -260,7 +256,6 @@ def get_genotype(rsid, role):
 
 # ── 5. App UI ──
 st.title("Phenome Query: Enhanced Trait-Based SNP Explorer")
-
 page = st.sidebar.radio("Navigate to:", ["Individual", "Child Phenome Predictor"])
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
@@ -285,7 +280,7 @@ else:
 
 selected = st.multiselect("Select traits:", list(traits_info.keys()))
 
-# Height calculator on predictor page
+# Height on predictor page
 if page == "Child Phenome Predictor" and "Height" in selected:
     st.subheader("Height Calculator")
     c1, c2 = st.columns(2)
@@ -317,25 +312,21 @@ if page == "Child Phenome Predictor" and "Height" in selected:
     st.altair_chart(chart)
     st.markdown("---")
 
-# Loop traits
 for trait in selected:
     if page == "Individual" and trait == "Height":
         continue
 
     info = traits_info[trait]
     with st.expander(trait, expanded=True):
-        # Gene summary
         st.subheader("Trait Gene Summary")
         if info["gene"]:
             st.write(f"**Gene**: {info['gene']}")
         st.write(info["description"])
 
-        # Hair interpretation
         if trait == "Hair Colour":
             st.subheader("Trait Interpretation")
             st.write(info["interpretation"])
 
-        # Genotypes & Inheritance
         if info["snps"]:
             st.subheader("Genotypes & Inheritance")
             individual_present = False
@@ -388,71 +379,114 @@ for trait in selected:
 
                 st.markdown("")
 
-            # Summary
             st.subheader("Summary")
 
             if trait == "Freckles":
-                # ... (Freckles summary unchanged) ...
-
-            elif trait == "Hair Colour":
-                # ... (Hair summary unchanged) ...
-
-            elif trait == "Red-Green Colourblindness":
-                # ... (Colourblindness summary unchanged) ...
-
-            elif trait == "Eye Colour":
-                # ... (Eye summary unchanged) ...
-
-            elif trait == "Skin Tone":
-                # ... (Skin Tone summary unchanged) ...
-
-            elif trait == "Earwax Type":
-                # ... (Earwax summary unchanged) ...
-
-            elif trait == "Lactose Intolerance":
-                # ... (Lactose summary unchanged) ...
-
-            elif trait == "PTC Tasting":
-                # ... (PTC summary unchanged) ...
-
-            elif trait == "Coriander Taste":
-                # ... (Coriander summary unchanged) ...
-
-            elif trait == "Sprint Gene":
-                # Fixed Sprint Gene summary:
                 if page == "Individual":
-                    gt, _, _ = get_genotype(info["snps"][0], "ind")
-                    geno = "".join("R" if a==0 else "X" for a in sorted(gt))
-                    if geno == "RR":
-                        summary = "RR genotype: presence of R allele associated with better sprint and power performance."
-                    elif geno in ("RX", "XR"):
-                        summary = "RX genotype: presence of R allele associated with better sprint and power performance."
-                    else:
-                        summary = (
-                            "XX genotype: lack of functional alpha-actinin-3, "
-                            "linked to reduced sprint performance and potentially higher injury risk."
-                        )
+                    total_alt = sum(get_genotype(s, "ind")[0].count(1) for s in info["snps"])
+                    summary = (
+                        "No freckles" if total_alt == 0
+                        else "Mild freckling" if total_alt <= 2
+                        else "Pronounced freckling"
+                    )
                     st.write(summary)
                 else:
-                    m_gt, _, _ = get_genotype(info["snps"][0], "mom")
-                    f_gt, _, _ = get_genotype(info["snps"][0], "dad")
-                    probs = child_genotype_probs(m_gt, f_gt)
-                    rr_pct = next((p["pct"] for p in probs if p["geno"]==(0,0)), 0)
-                    rx_pct = next((p["pct"] for p in probs if sorted(p["geno"])==[0,1]), 0)
-                    xx_pct = next((p["pct"] for p in probs if p["geno"]==(1,1)), 0)
-                    st.write(f"RR genotype: {rr_pct:.1f}% chance → better sprint/power performance")
-                    st.write(f"RX genotype: {rx_pct:.1f}% chance → presence of R allele → better sprint performance")
-                    st.write(f"XX genotype: {xx_pct:.1f}% chance → lack of alpha-actinin-3 → reduced sprint performance")
+                    m1,_,_ = get_genotype(info["snps"][0], "mom")
+                    f1,_,_ = get_genotype(info["snps"][0], "dad")
+                    p1 = child_genotype_probs(m1, f1)
+                    m2,_,_ = get_genotype(info["snps"][1], "mom")
+                    f2,_,_ = get_genotype(info["snps"][1], "dad")
+                    p2 = child_genotype_probs(m2, f2)
+                    P1_00 = next((x["pct"] for x in p1 if x["geno"]==(0,0)), 0)/100
+                    P2_00 = next((x["pct"] for x in p2 if x["geno"]==(0,0)), 0)/100
+                    P_no = P1_00 * P2_00 * 100
+                    P1_hom = next((x["pct"] for x in p1 if x["geno"]==(1,1)), 0)/100
+                    P2_hom = next((x["pct"] for x in p2 if x["geno"]==(1,1)), 0)/100
+                    P_pron = (P1_hom + P2_hom - P1_hom * P2_hom) * 100
+                    P_mild = 100 - P_no - P_pron
+                    st.write(f"No freckles: {P_no:.1f}%")
+                    st.write(f"Mild freckling: {P_mild:.1f}%")
+                    st.write(f"Pronounced freckling: {P_pron:.1f}%")
 
-            elif trait == "Alcohol Flush":
-                # ... (Alcohol Flush summary unchanged) ...
+            elif trait == "Hair Colour":
+                if page == "Individual":
+                    total_alt = sum(get_genotype(s, "ind")[0].count(1) for s in info["snps"])
+                    hair_sum = (
+                        "Non-red hair" if total_alt == 0
+                        else "Auburn hair" if total_alt == 1
+                        else "True red hair"
+                    )
+                    st.write(hair_sum)
+                else:
+                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
+                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
+                    p = child_genotype_probs(m_gt, f_gt)
+                    p00 = next((x["pct"] for x in p if x["geno"]==(0,0)),0)
+                    p01 = next((x["pct"] for x in p if x["geno"]==(0,1)),0)
+                    p11 = next((x["pct"] for x in p if x["geno"]==(1,1)),0)
+                    st.write(f"Non-red hair: {p00:.1f}%")
+                    st.write(f"Auburn hair: {p01:.1f}%")
+                    st.write(f"True red hair: {p11:.1f}%")
 
-        else:
-            st.write("_No defined SNPs for this trait._")
+            elif trait == "Red-Green Colourblindness":
+                if page == "Individual":
+                    gt,_,_ = get_genotype(info["snps"][0],"ind")
+                    phenotype = "Red green colour blind" if any(gt) else "Not red green colour blind"
+                    st.write(phenotype)
+                else:
+                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
+                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
+                    p = child_genotype_probs(m_gt, f_gt)
+                    present = sum(x["pct"] for x in p if any(x["geno"]))
+                    st.write(f"Red green colour blind: {present:.1f}%")
+                    st.write(f"Not red green colour blind: {100-present:.1f}%")
 
-        st.markdown("---")
+            elif trait == "Eye Colour":
+                if page == "Individual":
+                    gt,_,_ = get_genotype(info["snps"][0],"ind")
+                    phenotype = "Blue eyes" if gt == [0,0] else "Brown eyes"
+                    st.write(phenotype)
+                else:
+                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
+                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
+                    p = child_genotype_probs(m_gt, f_gt)
+                    blue = next((x["pct"] for x in p if x["geno"]==(0,0)),0)
+                    brown = 100 - blue
+                    st.write(f"Blue eyes: {blue:.1f}%")
+                    st.write(f"Brown eyes: {brown:.1f}%")
 
-# ── Delete VCF references after use ──
-# VCF files are deleted after the query
-if use_real_vcf:
-    del vcf_ind, vcf_m, vcf_f
+            elif trait == "Skin Tone":
+                if page == "Individual":
+                    gt,_,_ = get_genotype(info["snps"][0],"ind")
+                    if gt == [1,1]:
+                        st.write("Lighter skin tone")
+                    elif gt[0]!=gt[1]:
+                        st.write("Intermediate skin tone")
+                    else:
+                        st.write("Darker skin tone")
+                    st.image(
+                        [
+                            "https://via.placeholder.com/150?text=High+Skin+Tone",
+                            "https://via.placeholder.com/150?text=Intermediate+Skin+Tone",
+                            "https://via.placeholder.com/150?text=Low+Skin+Tone"
+                        ],
+                        caption=["High","Intermediate","Low"],
+                        width=120
+                    )
+                else:
+                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
+                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
+                    p = child_genotype_probs(m_gt, f_gt)
+                    light = next((x["pct"] for x in p if x["geno"]==(1,1)),0)
+                    inter = next((x["pct"] for x in p if sorted(x["geno"])==[0,1]),0)
+                    dark = 100 - light - inter
+                    st.write(f"Lighter skin tone: {light:.1f}%")
+                    st.write(f"Intermediate skin tone: {inter:.1f}%")
+                    st.write(f"Darker skin tone: {dark:.1f}%")
+                    st.image(
+                        [
+                            "https://via.placeholder.com/150?text=High+Skin+Tone",
+                            "https://via.placeholder.com/150?text=Intermediate+Skin+Tone",
+                            "https://via.placeholder.com/150?text=Low+Skin+Tone"
+                        ],
+                        caption
