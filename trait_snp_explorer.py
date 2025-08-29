@@ -5,14 +5,14 @@ import pandas as pd
 import altair as alt
 import requests
 
-# Attempt cyvcf2 import for real VCF parsing
+# Try to import cyvcf2 for real VCF parsing
 use_real_vcf = False
 vcf_ind, vcf_m, vcf_f = None, None, None
 sample_ind, sample_mom, sample_dad = None, None, None
 try:
     from cyvcf2 import VCF
 except ImportError:
-    VCF = None
+    VCF = None  # will fall back to mock
 
 st.set_page_config(page_title="Phenome Query", layout="wide")
 
@@ -140,7 +140,7 @@ mock_vcf_data = {
     "rs671":     {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
 }
 
-# ── 3. Annotation fetchers ──
+# ── 3. ClinVar & gnomAD fetchers ──
 @st.cache_data(ttl=24*3600)
 def fetch_clinvar(rsid):
     rid = rsid.lstrip("rs")
@@ -186,9 +186,7 @@ def alleles_from_gt(gt, ref, alt):
     return "/".join(ref if a == 0 else alt for a in gt)
 
 def display_genotype(gt, ref, alt):
-    binary = f"{gt[0]}/{gt[1]}"
-    allele_str = alleles_from_gt(gt, ref, alt)
-    return binary, allele_str
+    return f"{gt[0]}/{gt[1]}", alleles_from_gt(gt, ref, alt)
 
 def trait_present(gt, inheritance):
     if inheritance == "dominant":
@@ -225,31 +223,37 @@ def cm_to_ftin(cm):
 
 def get_genotype(rsid, role):
     """
-    role: "ind", "mom", "dad"
+    role: "ind", "mom", or "dad"
     Returns: (gt_list, ref, alt)
     """
+    # Real VCF branch
     if use_real_vcf and VCF:
-        vcf_obj, samp = {
+        vobj, samp = {
             "ind": (vcf_ind, sample_ind),
             "mom": (vcf_m, sample_mom),
             "dad": (vcf_f, sample_dad),
         }[role]
         try:
-            rec = next(vcf_obj(f"{rsid}"), None)
+            rec = next(vobj(f"{rsid}"), None)
             gt = rec.genotype(samp)["GT"]
             return gt, rec.REF, rec.ALT[0]
         except Exception:
             pass
-    data = mock_vcf_data.get(rsid)
+
+    # Mock fallback branch
+    data = mock_vcf_data[rsid]
     if role == "ind":
         return data["gt"], data["ref"], data["alt"]
-    return data[role], data["ref"], data["alt"]
+    if role == "mom":
+        return data["mother"], data["ref"], data["alt"]
+    # role == "dad"
+    return data["father"], data["ref"], data["alt"]
 
 # ── 5. App UI ──
 st.title("Phenome Query: Enhanced Trait-Based SNP Explorer")
 page = st.sidebar.radio("Navigate to:", ["Individual", "Child Phenome Predictor"])
 
-# Data upload section
+# Data upload
 st.sidebar.subheader("Data Upload")
 if page == "Individual":
     vcf_file = st.sidebar.file_uploader("Upload Individual VCF", type=["vcf","vcf.gz"])
@@ -302,7 +306,7 @@ if page == "Child Phenome Predictor" and "Height" in selected:
     st.altair_chart(chart)
     st.markdown("---")
 
-# Loop through selected traits
+# Loop traits
 for trait in selected:
     if page == "Individual" and trait == "Height":
         continue
@@ -315,16 +319,15 @@ for trait in selected:
             st.write(f"**Gene**: {info['gene']}")
         st.write(info["description"])
 
-        # Hair Colour interpretation section
+        # Hair Colour interpretation
         if trait == "Hair Colour":
             st.subheader("Trait Interpretation")
             st.write(info["interpretation"])
 
-        # SNP Genotypes & Inheritance
+        # Genotypes & Inheritance
         if info["snps"]:
             st.subheader("Genotypes & Inheritance")
             for snp in info["snps"]:
-                # Individual page uses role "ind", Predictor uses "mom"/"dad"
                 if page == "Individual":
                     gt, ref, alt = get_genotype(snp, "ind")
                     b, a = display_genotype(gt, ref, alt)
@@ -373,7 +376,7 @@ for trait in selected:
                     for p in probs:
                         cb = f"{p['geno'][0]}/{p['geno'][1]}"
                         ca = alleles_from_gt(p["geno"], m_ref, m_alt)
-                        pres, mode = format_presence(p["geno"], info["inheritance"])
+                        pres, mode =	format_presence(p["geno"], info["inheritance"])
                         st.write(f"- {cb} ({ca}): {p['pct']:.0f}% → "
                                  f"{p['zygosity']}, {pres} {mode}")
 
@@ -390,3 +393,8 @@ for trait in selected:
         else:
             st.write("_No defined SNPs for this trait._")
             st.markdown("---")
+
+# ── Delete VCF references after querying to free memory ──
+# VCF files are deleted after use
+if use_real_vcf:
+    del vcf_ind, vcf_m, vcf_f
