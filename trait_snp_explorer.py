@@ -277,6 +277,48 @@ else:
 
 selected = st.multiselect("Select traits:", list(traits_info.keys()))
 
+# ── Overall Summary Table ──
+if selected:
+    st.subheader("Overall Summary Table")
+    rows = []
+    for trait in selected:
+        info = traits_info[trait]
+
+        # No SNPs trait
+        if not info["snps"]:
+            summary = "-"
+        # Freckles uses combined ALT count
+        elif trait == "Freckles":
+            total_alt = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            if total_alt == 0:
+                summary = "No freckles"
+            elif total_alt <= 2:
+                summary = "Mild freckling"
+            else:
+                summary = "Pronounced freckling"
+        # Hair Colour uses combined ALT count
+        elif trait == "Hair Colour":
+            total_alt = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            summary = ("Non-red" if total_alt == 0
+                       else "Auburn" if total_alt == 1
+                       else "True red")
+        # Other binary traits
+        else:
+            # grab the first SNP
+            gt, _, _ = get_genotype(info["snps"][0], "ind")
+            pres = trait_present(gt, info["inheritance"])
+            if pres is None:
+                summary = "-"
+            else:
+                summary = "Present" if pres else "Absent"
+
+        rows.append({"Trait": trait, "Summary": summary})
+
+    df_summary = pd.DataFrame(rows)
+    st.table(df_summary)
+
 # Height on predictor page
 if page=="Child Phenome Predictor" and "Height" in selected:
     st.subheader("Height Calculator")
