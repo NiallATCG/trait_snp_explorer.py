@@ -278,46 +278,104 @@ else:
 selected = st.multiselect("Select traits:", list(traits_info.keys()))
 
 # ── Overall Summary Table ──
+# ── Overall Summary Table ──
 if selected:
     st.subheader("Overall Summary Table")
     rows = []
     for trait in selected:
         info = traits_info[trait]
 
-        # No SNPs trait
-        if not info["snps"]:
-            summary = "-"
-        # Freckles uses combined ALT count
+        # Height is not SNP-based
+        if trait == "Height":
+            summary = "N/A"
+
+        # Freckles: count ALT alleles across both SNPs
         elif trait == "Freckles":
-            total_alt = sum(get_genotype(s, "ind")[0].count(1)
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
                             for s in info["snps"])
-            if total_alt == 0:
+            if alt_count == 0:
                 summary = "No freckles"
-            elif total_alt <= 2:
+            elif alt_count <= 2:
                 summary = "Mild freckling"
             else:
                 summary = "Pronounced freckling"
-        # Hair Colour uses combined ALT count
+
+        # Hair Colour: count ALT alleles
         elif trait == "Hair Colour":
-            total_alt = sum(get_genotype(s, "ind")[0].count(1)
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
                             for s in info["snps"])
-            summary = ("Non-red" if total_alt == 0
-                       else "Auburn" if total_alt == 1
-                       else "True red")
-        # Other binary traits
-        else:
-            # grab the first SNP
-            gt, _, _ = get_genotype(info["snps"][0], "ind")
-            pres = trait_present(gt, info["inheritance"])
-            if pres is None:
-                summary = "-"
+            if alt_count == 0:
+                summary = "Non-red hair"
+            elif alt_count == 1:
+                summary = "Auburn hair"
             else:
-                summary = "Present" if pres else "Absent"
+                summary = "True red hair"
+
+        # Eye Colour: G/G → blue, else brown
+        elif trait == "Eye Colour":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            summary = "Blue eyes" if gt == [0,0] else "Brown eyes"
+
+        # Skin Tone: A/A → lighter, A/G → intermediate, G/G → darker
+        elif trait == "Skin Tone":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            if gt == [1,1]:
+                summary = "Lighter skin tone"
+            elif gt[0] != gt[1]:
+                summary = "Intermediate skin tone"
+            else:
+                summary = "Darker skin tone"
+
+        # Earwax Type: A/A → dry, else wet
+        elif trait == "Earwax Type":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            summary = "Dry earwax" if gt.count(1) == 2 else "Wet earwax"
+
+        # Lactose Intolerance: T present → tolerant, else intolerant
+        elif trait == "Lactose Intolerance":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            summary = "Lactose tolerant" if any(gt) else "Lactose intolerant"
+
+        # PTC Tasting: any ALT → can taste, else cannot
+        elif trait == "PTC Tasting":
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            summary = "Can taste PTC" if alt_count > 0 else "Cannot taste PTC"
+
+        # Coriander Taste: any ALT → soapy perception, else normal
+        elif trait == "Coriander Taste":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            summary = ("Perceives coriander as soapy"
+                       if any(gt) else "Normal coriander taste")
+
+        # Red-Green Colourblindness: any ALT → colour blind, else not
+        elif trait == "Red-Green Colourblindness":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            summary = ("Red green colour blind" if any(gt)
+                       else "Not red green colour blind")
+
+        # Sprint Gene: any R allele (REF=0) → present, else absent
+        elif trait == "Sprint Gene":
+            gt = sorted(get_genotype(info["snps"][0], "ind")[0])
+            # REF allele (0) is “R”
+            sprint_present = 0 in gt
+            summary = ("Sprint gene present: better sprint performance"
+                       if sprint_present else "Sprint gene absent: reduced sprint")
+
+        # Alcohol Flush: any ALT → flush present, else not present
+        elif trait == "Alcohol Flush":
+            gt = get_genotype(info["snps"][0], "ind")[0]
+            summary = ("Alcohol flush present" if any(gt)
+                       else "Alcohol flush not present")
+
+        # Fallback
+        else:
+            summary = ""
 
         rows.append({"Trait": trait, "Summary": summary})
 
-    df_summary = pd.DataFrame(rows)
-    st.table(df_summary)
+    st.table(pd.DataFrame(rows))
+
 
 # Height on predictor page
 if page=="Child Phenome Predictor" and "Height" in selected:
