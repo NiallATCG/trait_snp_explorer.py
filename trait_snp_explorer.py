@@ -666,11 +666,66 @@ report_groups = {
         "Sprint Gene", "Lactose Intolerance", "PTC Tasting",
         "Coriander Taste", "Red-Green Colourblindness", "Alcohol Flush"
     ],
-    "Genetic Reponse to Drugs (Work in Progress)": []
+    "Genetic Response to Drugs": {
+        "Cardiology": [
+            "Warfarin response",
+            "Statin myopathy risk",
+            "Clopidogrel response",
+            "Dabigatran activation"
+        ],
+        "Psychiatry & Neurology": [
+            "Opioid analgesic response",
+            "Atomoxetine response",
+            "Tricyclic antidepressant response",
+            "SSRI response",
+            "Carbamazepine hypersensitivity",
+            "Phenytoin toxicity risk",
+            "Valproic acid and POLG",
+            "Siponimod contraindication"
+        ],
+        "Oncology": [
+            "Fluoropyrimidine toxicity risk",
+            "Irinotecan toxicity risk",
+            "Tamoxifen efficacy",
+            "Thiopurine toxicity risk",
+            "Anthracycline cardiotoxicity markers"
+        ],
+        "Infectious Disease": [
+            "Abacavir hypersensitivity",
+            "Allopurinol severe skin reaction risk",
+            "Flucloxacillin liver injury risk",
+            "Efavirenz exposure",
+            "Atazanavir hyperbilirubinaemia",
+            "Voriconazole dosing"
+        ],
+        "Immunosuppression & Transplant": [
+            "Tacrolimus dosing",
+            "Thiopurine dosing (transplant)",
+            "Mycophenolate response (research)"
+        ],
+        "Smoking Cessation": [
+            "Smoking cessation pharmacogenetics",
+            "Bupropion dosing"
+        ]
+    }
+}
+2. Update the UI logic
 }
 
 # Dropdown for report selection
 report = st.selectbox("Select Report", list(report_groups.keys()), index=1)
+
+if report == "Genetic Response to Drugs":
+    subsection = st.selectbox("Select Indication", list(report_groups[report].keys()))
+    selected = st.multiselect(
+        f"Select traits from {subsection}:",
+        report_groups[report][subsection]
+    )
+else:
+    selected = st.multiselect(
+        f"Select traits from {report}:",
+        report_groups[report]
+    )
 
 # Larger multiselect for traits within chosen report
 selected = st.multiselect(
@@ -679,7 +734,6 @@ selected = st.multiselect(
     label_visibility="visible"
 )
 
-# ── Overall Summary Table ──
 # ── Overall Summary Table ──
 if selected:
     st.subheader("Overall Summary Table")
