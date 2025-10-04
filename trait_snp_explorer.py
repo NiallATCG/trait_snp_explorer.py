@@ -528,10 +528,13 @@ for trait in selected:
             st.subheader("**Overview**")
             st.write(info["overview"])
 
-        # Then gene and technical description
+        # Gene
         if info["gene"]:
             st.write(f"**Gene**: {info['gene']}")
-            st.write(info["description"])   
+
+        # Molecular mechanisms
+        if info["description"]:    
+            st.write(f"**Molecular Mechanisms**: {info['gene']}")
 
         # Hair interpretation
         if trait=="Hair Colour":
