@@ -207,6 +207,7 @@ traits_info = {
             "Alcohol flush is an adverse reaction to alcohol caused by a genetic variant in the *ALDH2 gene" 
             "specifically the ALDH22 allele (rs671), which reduces the effectiveness of the acetaldehyde dehydrogenase enzyme."
             "This leads to a buildup of acetaldehyde in the body, producing symptoms like facial flushing, nausea, and headache, and is prevalent in East Asian populations."
+        )
     }
 }
 
