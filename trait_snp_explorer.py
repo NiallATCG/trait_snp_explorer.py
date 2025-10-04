@@ -726,13 +726,6 @@ else:
         report_groups[report]
     )
 
-# Larger multiselect for traits within chosen report
-selected = st.multiselect(
-    f"Select traits from {report}:", 
-    report_groups[report],
-    label_visibility="visible"
-)
-
 # ── Overall Summary Table ──
 if selected:
     st.subheader("Overall Summary Table")
