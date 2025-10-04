@@ -524,12 +524,12 @@ for trait in selected:
         st.subheader("Trait Gene Summary")
         if info["gene"]:
             st.write(f"**Gene**: {info['gene']}")
-        st.write(info["description"])
+            st.write(info["description"])
 
         # Show plain-language overview if available
 
         if "overview" in info:
-        st.markdown("**Overview**")
+            st.markdown("**Overview**")
         st.write(info["overview"])
 
         # Hair interpretation
