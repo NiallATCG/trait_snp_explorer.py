@@ -25,7 +25,16 @@ traits_info = {
             "MC1R switches between brown/black eumelanin and red/yellow pheomelanin. "
             "Variants at rs1805007 & rs1805008 increase freckling."
         ),
-        "inheritance": "dominant"
+        "inheritance": "dominant",
+        "overview": (
+            "Freckles are small, pigmented spots on the skin that appear more prominently "
+            "with sun exposure. They are strongly influenced by variants in the MC1R gene, "
+            "which regulates the balance between eumelanin (brown/black pigment) and "
+            "pheomelanin (red/yellow pigment). Certain MC1R variants, such as rs1805007 and "
+            "rs1805008, reduce eumelanin production and increase pheomelanin, making the skin "
+            "more prone to freckling. Inheritance is typically dominant, meaning one altered "
+            "copy can increase the likelihood of freckles."
+        )
     },
     "Red-Green Colourblindness": {
         "gene": "OPN1LW",
@@ -34,7 +43,14 @@ traits_info = {
             "X-linked defects in OPN1LW/OPN1MW cause red-green colourblindness. "
             "Males need one variant; females require two."
         ),
-        "inheritance": "recessive"
+        "inheritance": "recessive",
+        "overview": (
+            "Red‑green colourblindness is caused by defects in the OPN1LW and OPN1MW genes, "
+            "which encode light‑sensitive opsins in the retina. The rs104894 variant disrupts "
+            "normal function, impairing the ability to distinguish red from green. Because these "
+            "genes are located on the X chromosome, inheritance is X‑linked recessive: males need "
+            "only one altered copy to be affected, while females require two."
+        )
     },
     "Hair Colour": {
         "gene": "MC1R",
@@ -47,6 +63,14 @@ traits_info = {
         "interpretation": (
             "Variants at rs1805007 & rs1805008 reduce MC1R activity. "
             "Heterozygotes often have auburn hair; homozygotes typically have true red hair."
+        ),
+        "overview": (
+            "Hair colour is determined by the type and amount of melanin produced in hair follicles. "
+            "Variants in the MC1R gene play a major role in red hair. The rs1805007 and rs1805008 "
+            "variants reduce MC1R activity, shifting pigment production toward pheomelanin. "
+            "Individuals with one copy often have auburn hair, while those with two copies usually "
+            "have true red hair. This trait follows a dominant pattern, though expression can vary "
+            "depending on other pigmentation genes."
         )
     },
     "Eye Colour": {
@@ -56,7 +80,14 @@ traits_info = {
             "HERC2 regulates OCA2 expression. G/G at rs12913832 yields blue eyes; "
             "A/A or A/G yields brown."
         ),
-        "inheritance": "recessive"
+        "inheritance": "recessive",
+        "overview": (
+            "Eye colour is largely controlled by the HERC2 gene, which regulates expression of the "
+            "neighbouring OCA2 gene involved in melanin production in the iris. A key SNP, rs12913832, "
+            "determines whether eyes are blue or brown. Individuals with two G alleles typically have "
+            "blue eyes due to reduced melanin, while those with at least one A allele usually have "
+            "brown eyes. The inheritance is recessive, with blue eyes requiring two copies of the G allele."
+        )
     },
     "Height": {
         "gene": None,
@@ -64,25 +95,51 @@ traits_info = {
         "description": (
             "Height is polygenic. Mid-parental height adjusted by child’s sex gives an estimate."
         ),
-        "inheritance": None
+        "inheritance": None,
+        "overview": (
+            "Height is a polygenic trait, meaning it is influenced by hundreds of genes as well as "
+            "environmental factors like nutrition. While no single SNP determines height, a common "
+            "clinical estimate uses mid‑parental height adjusted for the child’s sex. This provides a "
+            "probabilistic range rather than a precise prediction, reflecting the complex inheritance of stature."
+        )
     },
     "Skin Tone": {
         "gene": "SLC24A5",
         "snps": ["rs1426654"],
         "description": "rs1426654 A/A associates with lighter skin tone.",
-        "inheritance": "recessive"
+        "inheritance": "recessive",
+        "overview": (
+            "Skin pigmentation is influenced by many genes, but SLC24A5 is one of the most important. "
+            "The rs1426654 variant alters melanin production, with the A allele associated with lighter "
+            "skin tones. Individuals with two A alleles tend to have lighter skin, heterozygotes show "
+            "intermediate pigmentation, and those with two G alleles usually have darker skin. This SNP "
+            "is a classic example of a recessive effect."
+        )
     },
     "Earwax Type": {
         "gene": "ABCC11",
         "snps": ["rs17822931"],
         "description": "rs17822931 G→A: G allele → wet earwax; A/A → dry earwax.",
-        "inheritance": "dominant"
+        "inheritance": "dominant",
+        "overview": (
+            "Earwax consistency is determined by the ABCC11 gene. The rs17822931 SNP distinguishes between "
+            "wet and dry earwax. The G allele produces wet earwax, while individuals with two A alleles have "
+            "dry earwax. This trait is inherited in a dominant fashion, with the presence of at least one G "
+            "allele leading to wet earwax."
+        )
     },
     "Lactose Intolerance": {
         "gene": "MCM6",
         "snps": ["rs4988235"],
         "description": "rs4988235 T allele maintains lactase; C/C → lactose intolerance.",
-        "inheritance": "dominant"
+        "inheritance": "dominant",
+        "overview": (
+            "The ability to digest lactose in adulthood depends on regulatory variants near the MCM6 gene, "
+            "which control expression of the lactase enzyme (LCT). The rs4988235 T allele maintains lactase "
+            "activity, allowing lactose tolerance, while individuals with two C alleles typically lose lactase "
+            "activity after childhood, leading to lactose intolerance. This trait is inherited in a dominant "
+            "manner, with just one T allele sufficient for tolerance."
+        )
     },
     "PTC Tasting": {
         "gene": "TAS2R38",
@@ -93,7 +150,13 @@ traits_info = {
             "bitter compound phenylthiocarbamide (PTC), with some individuals perceiving "
             "it as strongly bitter while others taste little or nothing."
         ),
-        "inheritance": "dominant"
+        "inheritance": "dominant",
+        "overview": (
+            "The ability to taste the bitter compound phenylthiocarbamide (PTC) is controlled by the TAS2R38 gene. "
+            "Different haplotypes, such as PAV (taster) and AVI (non‑taster), determine sensitivity. The PAV haplotype "
+            "is dominant, so individuals with at least one copy can usually taste PTC as bitter, while AVI homozygotes "
+            "cannot. This is a classic example of a simple Mendelian trait in taste perception."
+        )
     },
     "Coriander Taste": {
         "gene": "OR6A2",
@@ -105,7 +168,15 @@ traits_info = {
             "in certain populations, makes these aldehydes taste and smell strongly of soap "
             "to affected individuals, overshadowing the herb's normal citrusy and herbal flavors."
         ),
-        "inheritance": "dominant"
+        "inheritance": "dominant",
+        "overview": (
+            "The perception of coriander (cilantro) as tasting soapy is influenced by the OR6A2 olfactory receptor gene. "
+            "The rs72921001 variant alters sensitivity to aldehydes, compounds found in both coriander and soap. "
+            "Individuals carrying the variant allele are more likely to perceive coriander as soapy, while others "
+            "experience its normal citrusy flavour. The trait shows dominant inheritance, with one copy often enough "
+            "to influence perception."
+        )
+
     },
     "Sprint Gene": {
         "gene": "ACTN3",
@@ -116,6 +187,13 @@ traits_info = {
             "XX genotype → deficiency, reduced sprint performance."
         ),
         "inheritance": "dominant"
+        "overview": (
+            "The ACTN3 gene, often called the sprint gene, provides instructions for making the alpha-actinin-3 protein," 
+            "which is crucial for fast-twitch muscle fibers that enable explosive,high-power movements like sprinting and jumping."
+            "A specific variation, associated with the "R" allele and SNP rs1815739, is linked to greater muscle power and handgrip strength."
+            "However, a non-functional variant, associated with the X allele, is linked to increased muscle damage and is"
+            "common in certain populations, impacting athletic potential."
+        )
     },
     "Alcohol Flush": {
         "gene": "ALDH2",
@@ -125,6 +203,10 @@ traits_info = {
             "Leads to facial redness, nausea, and higher cancer risk if alcohol+tobacco used."
         ),
         "inheritance": "dominant"
+        "overview": (
+            "Alcohol flush is an adverse reaction to alcohol caused by a genetic variant in the *ALDH2 gene" 
+            "specifically the ALDH22 allele (rs671), which reduces the effectiveness of the acetaldehyde dehydrogenase enzyme."
+            "This leads to a buildup of acetaldehyde in the body, producing symptoms like facial flushing, nausea, and headache, and is prevalent in East Asian populations."
     }
 }
 
