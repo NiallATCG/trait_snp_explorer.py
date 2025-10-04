@@ -186,7 +186,7 @@ traits_info = {
             "The “sprint gene” polymorphism (R577X) affects alpha-actinin-3. R allele → fast-twitch fibers; "
             "XX genotype → deficiency, reduced sprint performance."
         ),
-        "inheritance": "dominant"
+        "inheritance": "dominant",
         "overview": (
             "The ACTN3 gene, often called the sprint gene, provides instructions for making the alpha-actinin-3 protein," 
             "which is crucial for fast-twitch muscle fibers that enable explosive,high-power movements like sprinting and jumping."
@@ -202,7 +202,7 @@ traits_info = {
             "rs671 A allele reduces enzyme activity, causing flush (Asian flush). "
             "Leads to facial redness, nausea, and higher cancer risk if alcohol+tobacco used."
         ),
-        "inheritance": "dominant"
+        "inheritance": "dominant",
         "overview": (
             "Alcohol flush is an adverse reaction to alcohol caused by a genetic variant in the *ALDH2 gene" 
             "specifically the ALDH22 allele (rs671), which reduces the effectiveness of the acetaldehyde dehydrogenase enzyme."
