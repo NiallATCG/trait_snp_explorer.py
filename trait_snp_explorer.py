@@ -208,6 +208,304 @@ traits_info = {
             "specifically the ALDH22 allele (rs671), which reduces the effectiveness of the acetaldehyde dehydrogenase enzyme."
             "This leads to a buildup of acetaldehyde in the body, producing symptoms like facial flushing, nausea, and headache, and is prevalent in East Asian populations."
         )
+        
+      # 🫀 Cardiology
+    },
+    "Warfarin response": {
+        "gene": "VKORC1; CYP2C9; CYP4F2",
+        "snps": ["rs9923231", "CYP2C9*2", "CYP2C9*3", "rs2108622"],
+        "description": (
+            "VKORC1 rs9923231 reduces VKORC1 expression (higher sensitivity); "
+            "CYP2C9*2/*3 reduce warfarin clearance (higher exposure); "
+            "CYP4F2 rs2108622 reduces vitamin K oxidation (slightly higher dose)."
+        ),
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Warfarin dosing varies widely. VKORC1 variants increase sensitivity, CYP2C9 loss‑of‑function slows "
+            "clearance and raises bleeding risk, and CYP4F2 variants can increase dose requirements. Combined "
+            "genotyping guides initial dose and reduces adverse events."
+        )
+    },
+    "Statin myopathy risk": {
+        "gene": "SLCO1B1; ABCG2",
+        "snps": ["rs4149056", "rs2231142"],
+        "description": (
+            "SLCO1B1 rs4149056 (Val174Ala) lowers hepatic uptake → higher plasma statin and myopathy risk; "
+            "ABCG2 rs2231142 reduces efflux → increased exposure."
+        ),
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Statin intolerance often stems from higher systemic exposure. SLCO1B1 and ABCG2 variants raise blood "
+            "levels and myopathy risk, especially with simvastatin. Results can inform statin choice or lower dosing."
+        )
+    },
+    "Clopidogrel response": {
+        "gene": "CYP2C19",
+        "snps": ["CYP2C19*2", "CYP2C19*3", "CYP2C19*17"],
+        "description": (
+            "CYP2C19 loss‑of‑function (*2, *3) reduces clopidogrel activation → reduced antiplatelet effect; "
+            "*17 increases activity → higher bleeding risk."
+        ),
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Clopidogrel is a prodrug requiring CYP2C19 activation. Poor metabolisers have higher thrombotic risk; "
+            "ultrarapid metabolisers may bleed more. Genotyping supports switching to prasugrel/ticagrelor or dose changes."
+        )
+    },
+    "Dabigatran activation": {
+        "gene": "CES1",
+        "snps": ["CES1 variants"],
+        "description": (
+            "CES1 encodes carboxylesterase‑1 that activates dabigatran etexilate; functional variants alter conversion and exposure."
+        ),
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Dabigatran requires CES1 activation. Variants may change active drug levels and bleeding risk. Testing is emerging; "
+            "clinical use is context‑dependent."
+        )
+    },
+
+    # 🧠 Psychiatry & Neurology
+    "Opioid analgesic response": {
+        "gene": "CYP2D6",
+        "snps": ["CYP2D6*3", "CYP2D6*4", "CYP2D6*5", "CYP2D6*6", "copy number"],
+        "description": (
+            "CYP2D6 status drives activation/clearance of codeine, tramadol, hydrocodone, oxycodone. Poor → lack of efficacy; "
+            "ultrarapid → toxicity risk."
+        ),
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Many opioids are prodrugs or CYP2D6‑dependent. Poor metabolisers get little pain relief; ultrarapid metabolisers "
+            "can reach dangerous levels. Genotyping prevents treatment failure or overdose."
+        )
+    },
+    "Atomoxetine response": {
+        "gene": "CYP2D6",
+        "snps": ["CYP2D6 variants"],
+        "description": "CYP2D6 poor metabolisers have higher atomoxetine levels → more side effects; ultrarapid may need higher doses.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Atomoxetine clearance depends on CYP2D6. Dose reduction is advised in poor metabolisers; therapeutic failure can "
+            "occur in ultrarapid metabolisers."
+        )
+    },
+    "Tricyclic antidepressant response": {
+        "gene": "CYP2D6; CYP2C19",
+        "snps": ["CYP2D6 variants", "CYP2C19 variants"],
+        "description": "CYP2D6 and CYP2C19 influence amitriptyline/nortriptyline/imipramine levels → adjust dose or switch.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "TCAs have narrow therapeutic windows. Poor metabolisers risk toxicity; ultrarapid may not respond. Combined genotypes "
+            "guide dosing and drug choice."
+        )
+    },
+    "SSRI response": {
+        "gene": "CYP2D6; CYP2C19",
+        "snps": ["CYP2D6 variants", "CYP2C19 variants"],
+        "description": "Metaboliser status affects paroxetine, fluoxetine, sertraline, citalopram, escitalopram exposure and tolerability.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "SSRI efficacy and side effects track with CYP2D6/CYP2C19 activity. Genotyping supports dose adjustments or choosing "
+            "alternatives with better metabolic fit."
+        )
+    },
+    "Carbamazepine hypersensitivity": {
+        "gene": "HLA-B; HLA-A",
+        "snps": ["HLA-B*15:02", "HLA-A*31:01"],
+        "description": "HLA-B*15:02 and HLA-A*31:01 associate with SJS/TEN risk on carbamazepine/oxcarbazepine.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Certain HLA alleles markedly increase risk of life‑threatening skin reactions. Screening before therapy prevents SJS/TEN, "
+            "especially in at‑risk ancestries."
+        )
+    },
+    "Phenytoin toxicity risk": {
+        "gene": "CYP2C9; HLA-B",
+        "snps": ["CYP2C9*2", "CYP2C9*3", "HLA-B*15:02"],
+        "description": "CYP2C9 loss‑of‑function elevates phenytoin levels; HLA‑B*15:02 raises SJS/TEN risk.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Phenytoin has non‑linear kinetics; reduced CYP2C9 activity quickly leads to toxicity. Concurrent HLA risk mandates "
+            "alternative therapy or careful dosing."
+        )
+    },
+    "Valproic acid and POLG": {
+        "gene": "POLG",
+        "snps": ["POLG mutations"],
+        "description": "POLG pathogenic variants predispose to valproate‑induced liver failure/encephalopathy.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "POLG mutations impair mitochondrial replication. Valproate can precipitate catastrophic liver failure; avoid in suspected "
+            "mitochondrial disease."
+        )
+    },
+    "Siponimod contraindication": {
+        "gene": "CYP2C9",
+        "snps": ["CYP2C9*2", "CYP2C9*3"],
+        "description": "Siponimod is contraindicated in CYP2C9 poor metabolisers (*3/*3); dose adjustments for other genotypes.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "CYP2C9 genotype dictates siponimod exposure. Poor metabolisers are at higher risk; label recommends genotype‑guided use."
+        )
+    },
+
+    # 🧬 Oncology
+    "Fluoropyrimidine toxicity risk": {
+        "gene": "DPYD",
+        "snps": ["DPYD*2A", "DPYD*13", "rs67376798", "rs75017182"],
+        "description": "Pathogenic DPYD variants reduce DPD activity → severe 5‑FU/capecitabine toxicity. Reduce dose or avoid.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "DPYD encodes dihydropyrimidine dehydrogenase. Deficiency causes life‑threatening toxicity with fluoropyrimidines. "
+            "Pre‑treatment genotyping guides dose or alternative therapy."
+        )
+    },
+    "Irinotecan toxicity risk": {
+        "gene": "UGT1A1",
+        "snps": ["UGT1A1*28"],
+        "description": "UGT1A1*28 (TA repeat) reduces glucuronidation of SN‑38 → neutropenia risk; lower starting dose if homozygous.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Irinotecan’s active metabolite SN‑38 is cleared by UGT1A1. Reduced activity elevates toxicity. Testing identifies "
+            "patients who benefit from dose reduction."
+        )
+    },
+    "Tamoxifen efficacy": {
+        "gene": "CYP2D6",
+        "snps": ["CYP2D6 variants"],
+        "description": "CYP2D6 poor metabolisers have reduced endoxifen formation → potentially reduced tamoxifen efficacy.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Tamoxifen requires CYP2D6 to form active metabolites. Low activity may compromise benefit; consider alternative endocrine "
+            "therapy or careful monitoring."
+        )
+    },
+    "Thiopurine toxicity risk": {
+        "gene": "TPMT; NUDT15",
+        "snps": ["TPMT activity alleles", "rs116855232"],
+        "description": "Low TPMT/NUDT15 activity causes severe myelosuppression with thiopurines → reduce dose or avoid.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "TPMT and NUDT15 variants impair thiopurine inactivation. Even standard doses can be dangerous; phenotype/genotype "
+            "guides safe dosing."
+        )
+    },
+    "Anthracycline cardiotoxicity markers": {
+        "gene": "RARG; SLC28A3",
+        "snps": ["RARG variants", "SLC28A3 variants"],
+        "description": "Genetic markers associated with higher cardiotoxicity risk with doxorubicin/daunorubicin.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Anthracyclines can damage the heart. Certain variants may increase risk; results support intensified monitoring or "
+            "risk‑mitigation strategies."
+        )
+    },
+
+    # 🦠 Infectious Disease
+    "Abacavir hypersensitivity": {
+        "gene": "HLA-B",
+        "snps": ["HLA-B*57:01"],
+        "description": "HLA‑B*57:01 confers high risk of abacavir hypersensitivity → contraindicated if positive.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Pre‑treatment HLA‑B*57:01 testing is standard for abacavir. Positive patients should not receive the drug."
+        )
+    },
+    "Allopurinol severe skin reaction risk": {
+        "gene": "HLA-B",
+        "snps": ["HLA-B*58:01"],
+        "description": "HLA‑B*58:01 increases risk of SCAR (SJS/TEN) with allopurinol → avoid if positive.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Screening for HLA‑B*58:01 helps prevent life‑threatening reactions, especially in high‑prevalence populations."
+        )
+    },
+    "Flucloxacillin liver injury risk": {
+        "gene": "HLA-B",
+        "snps": ["HLA-B*57:01"],
+        "description": "HLA‑B*57:01 associates with higher risk of flucloxacillin‑induced liver injury.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Genetic risk stratification can inform vigilance and alternative antibiotics in susceptible patients."
+        )
+    },
+    "Efavirenz exposure": {
+        "gene": "CYP2B6",
+        "snps": ["rs3745274"],
+        "description": "CYP2B6 rs3745274 reduces clearance → higher efavirenz levels and CNS side effects; dose reduction may help.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Efavirenz neuropsychiatric side effects correlate with CYP2B6 genotype. Lower doses can improve tolerability in poor metabolisers."
+        )
+    },
+    "Atazanavir hyperbilirubinaemia": {
+        "gene": "UGT1A1",
+        "snps": ["UGT1A1*28"],
+        "description": "UGT1A1*28 increases indirect bilirubin with atazanavir → consider monitoring or alternative agent.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Benign jaundice from atazanavir is common with UGT1A1*28; genotype informs expectations and switching decisions."
+        )
+    },
+    "Voriconazole dosing": {
+        "gene": "CYP2C19",
+        "snps": ["CYP2C19*2", "CYP2C19*3", "CYP2C19*17"],
+        "description": "CYP2C19 genotype strongly affects voriconazole exposure → adjust dose to avoid toxicity or failure.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Therapeutic drug monitoring plus genotype gives the best outcome; poor metabolisers need lower doses, ultrarapid may need higher."
+        )
+    },
+
+    # 🧪 Immunosuppression & Transplant
+    "Tacrolimus dosing": {
+        "gene": "CYP3A5",
+        "snps": ["CYP3A5*3 (rs776746)"],
+        "description": "CYP3A5*3 non‑expressors have lower tacrolimus clearance → lower dose needed to reach target troughs.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Tacrolimus is highly variable. CYP3A5 expressors require higher doses; non‑expressors need less to achieve therapeutic levels."
+        )
+    },
+    "Thiopurine dosing (transplant)": {
+        "gene": "TPMT; NUDT15",
+        "snps": ["TPMT activity alleles", "rs116855232"],
+        "description": "Low TPMT/NUDT15 activity → severe myelosuppression with azathioprine/6‑MP/thioguanine; reduce dose or avoid.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Routine TPMT/NUDT15 testing prevents marrow toxicity. Dose individualisation is standard of care in many centres."
+        )
+    },
+    "Mycophenolate response (research)": {
+        "gene": "IMPDH1; IMPDH2",
+        "snps": ["IMPDH variants"],
+        "description": "IMPDH variants may influence mycophenolate efficacy/toxicity; evidence is emerging.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Mycophenolate targets IMPDH; genetic influences are under study and not yet used routinely in clinical decision‑making."
+        )
+    },
+
+    # 🚬 Smoking Cessation
+    "Smoking cessation pharmacogenetics": {
+        "gene": "CYP2A6; CHRNA5",
+        "snps": ["rs16969968", "CYP2A6 activity alleles"],
+        "description": "CHRNA5 rs16969968 associates with nicotine dependence; CYP2A6 activity affects nicotine clearance and cessation outcomes.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "Genetics shape nicotine dependence and response to therapies. CHRNA5 risk alleles and slow CYP2A6 clearance may guide "
+            "choice of varenicline, bupropion, or nicotine replacement."
+        )
+    },
+    "Bupropion dosing": {
+        "gene": "CYP2B6",
+        "snps": ["rs3745274"],
+        "description": "CYP2B6 poor metabolisers have higher bupropion exposure → adjust dose or monitor side effects.",
+        "inheritance": "Pharmacogenetic",
+        "overview": (
+            "CYP2B6 genotype influences bupropion levels for depression and smoking cessation. Dose tailoring can improve tolerability."
+ 
+        )
     }
 }
 
