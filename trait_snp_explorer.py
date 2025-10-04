@@ -709,7 +709,7 @@ report_groups = {
         ]
     }
 }
-2. Update the UI logic
+# 2. Update the UI logic
 
 # Dropdown for report selection
 report = st.selectbox("Select Report", list(report_groups.keys()), index=1)
