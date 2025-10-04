@@ -516,6 +516,7 @@ mock_vcf_data = {
         "mother": d["mother"], "father": d["father"], "gt": d["gt"]
     }
     for snp, d in {
+        # ── Original traits ──
         "rs1805007":  {"ref":"C","alt":"T","mother":[0,1],"father":[1,1],"gt":[1,1]},
         "rs1805008":  {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,1]},
         "rs104894":   {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},
@@ -528,9 +529,48 @@ mock_vcf_data = {
         "rs72921001": {"ref":"T","alt":"C","mother":[1,0],"father":[1,1],"gt":[1,1]},
         "rs1815739":  {"ref":"C","alt":"T","mother":[0,0],"father":[1,1],"gt":[1,1]},
         "rs671":      {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
-    }.items()
-}
 
+        # ── Pharmacogenetic traits ──
+        # Cardiology
+        "rs9923231":  {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},  # VKORC1
+        "rs2108622":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CYP4F2
+        "rs4149056":  {"ref":"T","alt":"C","mother":[0,1],"father":[0,0],"gt":[0,1]},  # SLCO1B1
+        "rs2231142":  {"ref":"G","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # ABCG2
+
+        # Psychiatry & Neurology
+        "rs3892097":  {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},  # CYP2D6*4 proxy
+        "rs1065852":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CYP2D6*10 proxy
+        "rs4244285":  {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},  # CYP2C19*2
+        "rs4986893":  {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CYP2C19*3
+        "rs12248560": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # CYP2C19*17
+        "rs3909184":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # HLA-A*31:01 proxy
+        "rs10484555": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # HLA-B*15:02 proxy
+        "rs121918508":{"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # POLG proxy
+        "rs1057910":  {"ref":"A","alt":"C","mother":[0,1],"father":[0,0],"gt":[0,1]},  # CYP2C9*3
+
+        # Oncology
+        "rs3918290":  {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # DPYD*2A
+        "rs67376798": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # DPYD variant
+        "rs75017182": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # DPYD variant
+        "rs8175347":  {"ref":"TA6","alt":"TA7","mother":[0,1],"father":[0,0],"gt":[0,1]}, # UGT1A1*28
+        "rs116855232":{"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # NUDT15
+        "rs1800460":  {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},  # TPMT proxy
+
+        # Infectious Disease
+        "rs2395029":  {"ref":"T","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,0]},  # HLA-B*57:01 proxy
+        "rs9263726":  {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # HLA-B*58:01 proxy
+        "rs3745274":  {"ref":"G","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CYP2B6
+        "rs8175347b": {"ref":"TA6","alt":"TA7","mother":[0,1],"father":[0,0],"gt":[0,1]}, # UGT1A1*28 (Atazanavir)
+
+        # Immunosuppression & Transplant
+        "rs776746":   {"ref":"A","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CYP3A5*3
+        "rs2073838":  {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # IMPDH1 proxy
+
+        # Smoking Cessation
+        "rs16969968": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CHRNA5
+    }.items()
+
+}
 # 3. ClinVar & gnomAD fetchers
 @st.cache_data(ttl=24*3600)
 def fetch_clinvar(rsid):
