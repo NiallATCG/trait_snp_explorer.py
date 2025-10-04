@@ -534,7 +534,7 @@ for trait in selected:
 
         # Molecular mechanisms
         if info["description"]:    
-            st.write(f"**Molecular Mechanisms**: {info['gene']}")
+            st.write(f"**Molecular Mechanisms**: {info['description']}")
 
         # Hair interpretation
         if trait=="Hair Colour":
