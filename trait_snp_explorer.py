@@ -522,15 +522,16 @@ for trait in selected:
     with st.expander(trait, expanded=True):
         # Gene summary
         st.subheader("Trait Gene Summary")
+
+        # Show plain-language overview first
+        if "overview" in info:
+            st.subheader("**Overview**")
+            st.write(info["overview"])
+
+        # Then gene and technical description
         if info["gene"]:
             st.write(f"**Gene**: {info['gene']}")
-            st.write(info["description"])
-
-        # Show plain-language overview if available
-
-        if "overview" in info:
-            st.markdown("**Overview**")
-        st.write(info["overview"])
+         st.write(info["description"])   
 
         # Hair interpretation
         if trait=="Hair Colour":
