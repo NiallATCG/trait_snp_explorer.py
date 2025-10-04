@@ -251,7 +251,7 @@ def get_genotype(rsid, role):
     return (d["mother"], d["ref"], d["alt"]) if role=="mom" else (d["father"], d["ref"], d["alt"])
 
 # 5. App UI
-st.title("Phenome Query: Enhanced Trait-Based SNP Explorer")
+st.title("Genome Scan: Enhanced Trait-Based SNP Explorer")
 page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"])
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
@@ -275,7 +275,28 @@ else:
         sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
         use_real_vcf = True
 
-selected = st.multiselect("Select traits:", list(traits_info.keys()))
+# Define report groups
+report_groups = {
+    "SNP Associated diseases (Work in Progress)": [],
+    "Externally Visible Characteristics": [
+        "Freckles", "Hair Colour", "Eye Colour", "Skin Tone", "Earwax Type", "Height"
+    ],
+    "Nutrition and Fitness": [
+        "Sprint Gene", "Lactose Intolerance", "PTC Tasting",
+        "Coriander Taste", "Red-Green Colourblindness", "Alcohol Flush"
+    ],
+    "Genetic Reponse to Drugs (Work in Progress)": []
+}
+
+# Dropdown for report selection
+report = st.selectbox("Select Report", list(report_groups.keys()), index=1)
+
+# Larger multiselect for traits within chosen report
+selected = st.multiselect(
+    f"Select traits from {report}:", 
+    report_groups[report],
+    label_visibility="visible"
+)
 
 # ── Overall Summary Table ──
 # ── Overall Summary Table ──
