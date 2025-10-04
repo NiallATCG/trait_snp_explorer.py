@@ -531,7 +531,7 @@ for trait in selected:
         # Then gene and technical description
         if info["gene"]:
             st.write(f"**Gene**: {info['gene']}")
-         st.write(info["description"])   
+            st.write(info["description"])   
 
         # Hair interpretation
         if trait=="Hair Colour":
