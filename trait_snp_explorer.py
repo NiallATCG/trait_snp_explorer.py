@@ -51,6 +51,64 @@ traits_info = {
             "genes are located on the X chromosome, inheritance is X‑linked recessive: males need "
             "only one altered copy to be affected, while females require two."
         )
+    "Tanning Response": {
+        "gene": "MC1R; ASIP; IRF4; HERC2/OCA2; SLC45A2; TYR",
+        "snps": ["rs1805007", "rs12203592", "rs12913832", "rs16891982", "rs1042602"],
+        "description": (
+            "Variants in pigmentation genes influence tanning ability. MC1R and IRF4 variants "
+            "reduce tanning capacity; HERC2/OCA2 and SLC45A2 variants affect melanin type and amount."
+        ),
+        "inheritance": "polygenic",
+        "overview": (
+            "Tanning response reflects the skin’s ability to produce melanin after UV exposure. "
+            "MC1R and IRF4 variants predispose to burning rather than tanning. HERC2/OCA2 rs12913832 "
+            "and SLC45A2 rs16891982 influence melanin levels, while TYR rs1042602 affects pigment synthesis. "
+            "Together, these variants determine tanning vs. burning tendency."
+        )
+    },
+
+    "Lentigines (Sun Spots)": {
+        "gene": "MC1R; HERC2/OCA2; ASIP",
+        "snps": ["rs1805007", "rs12913832", "rs6058017"],
+        "description": (
+            "Pigmentation SNPs predispose to solar lentigines, persistent pigmented lesions caused by UV exposure."
+        ),
+        "inheritance": "polygenic",
+        "overview": (
+            "Lentigines, or sun spots, are darker patches that persist with age and UV exposure. "
+            "MC1R variants increase susceptibility, while HERC2/OCA2 rs12913832 and ASIP rs6058017 "
+            "modulate pigmentation. These variants interact with environmental UV exposure to influence risk."
+        )
+    },
+
+    "Wrinkle & Collagen Degradation": {
+        "gene": "MMP1; MMP16; COL17A1; SOD2",
+        "snps": ["rs1799750", "rs6469206", "rs805698", "rs4880"],
+        "description": (
+            "Variants in collagen metabolism and oxidative stress genes influence wrinkle formation. "
+            "MMP1 rs1799750 increases collagenase activity; SOD2 rs4880 alters oxidative stress handling."
+        ),
+        "inheritance": "polygenic",
+        "overview": (
+            "Wrinkle formation and collagen degradation are influenced by both UV exposure and genetics. "
+            "MMP1 rs1799750 increases collagen breakdown, MMP16 and COL17A1 variants affect dermal structure, "
+            "and SOD2 rs4880 alters oxidative stress resilience. These variants predispose to earlier or more "
+            "pronounced wrinkling."
+        )
+    },
+
+    "Stretch Marks (Striae Distensae)": {
+        "gene": "ELN; FBN1; COL1A1; HMCN1",
+        "snps": ["rs3757587", "rs2118181", "rs1800012", "rs7999168"],
+        "description": (
+            "Variants in connective tissue genes predispose to dermal tearing and striae formation."
+        ),
+        "inheritance": "polygenic",
+        "overview": (
+            "Stretch marks occur when dermal connective tissue is disrupted. ELN (elastin) and FBN1 (fibrillin‑1) "
+            "variants reduce elasticity, COL1A1 rs1800012 affects collagen strength, and HMCN1 variants influence "
+            "dermal resilience. These genetic factors increase susceptibility to striae under mechanical stress."
+        )    
     },
     "Hair Colour": {
         "gene": "MC1R",
@@ -568,6 +626,27 @@ mock_vcf_data = {
 
         # Smoking Cessation
         "rs16969968": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CHRNA5
+
+        # Tanning response
+        "rs12913832": {"ref":"A","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,1]},  # HERC2/OCA2
+        "rs16891982": {"ref":"C","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},  # SLC45A2
+        "rs1042602":  {"ref":"C","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # TYR
+    
+        # Lentigines
+        "rs6058017":  {"ref":"G","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # ASIP
+    
+        # Wrinkle & collagen degradation
+        "rs1799750":  {"ref":"1","alt":"2","mother":[0,1],"father":[0,0],"gt":[0,1]},  # MMP1 promoter ins/del
+        "rs6469206":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # MMP16
+        "rs805698":   {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},  # COL17A1
+        "rs4880":     {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # SOD2
+    
+        # Stretch marks
+        "rs3757587":  {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # ELN
+        "rs2118181":  {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # FBN1
+        "rs1800012":  {"ref":"G","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # COL1A1
+        "rs7999168":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # HMCN1
+        
     }.items()
 
 }
@@ -700,7 +779,8 @@ else:
 report_groups = {
     "SNP Associated diseases (Work in Progress)": [],
     "Externally Visible Characteristics": [
-        "Freckles", "Hair Colour", "Eye Colour", "Skin Tone", "Earwax Type", "Height"
+        "Freckles", "Hair Colour", "Eye Colour", "Skin Tone", "Earwax Type", "Tanning Response",
+        "Lentigines (Sun Spots)", "Wrinkle & Collagen Degradation", "Stretch Marks (Striae Distensae)", "Height"
     ],
     "Nutrition and Fitness": [
         "Sprint Gene", "Lactose Intolerance", "PTC Tasting",
