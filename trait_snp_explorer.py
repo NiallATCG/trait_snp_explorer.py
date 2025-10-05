@@ -939,45 +939,23 @@ if selected:
 
         # ── New Dermatology Traits ──
 
+                # ── New Dermatology Traits ──
+
         elif trait == "Tanning Response":
-            alt_count = sum(get_genotype(s, "ind")[0].count(1)
-                            for s in info["snps"])
-            if alt_count == 0:
-                summary = "Good tanning ability"
-            elif alt_count <= 2:
-                summary = "Intermediate tanning"
-            else:
-                summary = "Poor tanning / burns easily"
+            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            summary = "Poor tanning / burns easily" if has_alt else "Good tanning ability"
 
         elif trait == "Lentigines (Sun Spots)":
-            alt_count = sum(get_genotype(s, "ind")[0].count(1)
-                            for s in info["snps"])
-            if alt_count == 0:
-                summary = "Lower likelihood of sun spots"
-            elif alt_count == 1:
-                summary = "Moderate likelihood of sun spots"
-            else:
-                summary = "Higher likelihood of sun spots"
+            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            summary = "Higher likelihood of sun spots" if has_alt else "Lower likelihood of sun spots"
 
         elif trait == "Wrinkle & Collagen Degradation":
-            alt_count = sum(get_genotype(s, "ind")[0].count(1)
-                            for s in info["snps"])
-            if alt_count == 0:
-                summary = "Lower wrinkle susceptibility"
-            elif alt_count == 1:
-                summary = "Moderate wrinkle susceptibility"
-            else:
-                summary = "Higher wrinkle susceptibility"
+            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            summary = "Higher wrinkle susceptibility" if has_alt else "Lower wrinkle susceptibility"
 
         elif trait == "Stretch Marks (Striae Distensae)":
-            alt_count = sum(get_genotype(s, "ind")[0].count(1)
-                            for s in info["snps"])
-            if alt_count == 0:
-                summary = "Lower stretch mark susceptibility"
-            elif alt_count == 1:
-                summary = "Moderate stretch mark susceptibility"
-            else:
-                summary = "Higher stretch mark susceptibility"
+            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            summary = "Higher stretch mark susceptibility" if has_alt else "Lower stretch mark susceptibility"
                 
         # Fallback
         else:
