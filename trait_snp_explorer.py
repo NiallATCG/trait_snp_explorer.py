@@ -735,6 +735,11 @@ mock_vcf_data.update({
     "IMPDH variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
 })
 
+# Ensure the exact key used in traits_info exists in mock_vcf_data
+mock_vcf_data.update({
+    "CYP3A5*3 (rs776746)": {"ref":"A","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,0]}
+})
+
 missing = []
 for trait, info in traits_info.items():
     for s in info["snps"]:
