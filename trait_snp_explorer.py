@@ -587,6 +587,7 @@ mock_vcf_data = {
         "rs72921001": {"ref":"T","alt":"C","mother":[1,0],"father":[1,1],"gt":[1,1]},
         "rs1815739":  {"ref":"C","alt":"T","mother":[0,0],"father":[1,1],"gt":[1,1]},
         "rs671":      {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
+        "rs12203592": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # IRF4
 
         # ── Pharmacogenetic traits ──
         # Cardiology
