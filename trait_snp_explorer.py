@@ -872,7 +872,7 @@ if selected:
         info = traits_info[trait]
 
         # 🔎 Debug: show trait name and genotypes being used
-            print("DEBUG:", trait, [get_genotype(s, "ind")[0] for s in info["snps"]])
+        print("DEBUG:", trait, [get_genotype(s, "ind")[0] for s in info["snps"]])
         
         # Height is not SNP-based
         if trait == "Height":
