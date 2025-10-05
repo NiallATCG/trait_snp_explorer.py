@@ -799,11 +799,7 @@ def get_trait_summary(trait, info):
     # Fallback
     else:
         summary = "Summary missing"
-# --- UI: trait selection ---
-selected = st.multiselect(
-    "Select traits to explore",
-    options=list(traits_info.keys())
-)
+
 # Mock genotype data
 mock_vcf_data = {
     snp: {
