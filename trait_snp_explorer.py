@@ -707,8 +707,8 @@ def get_trait_summary(trait, info):
 
     elif trait == "SSRI response":
         d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
-            c19var = 1 in get_genotype("CYP2C19 variants", "ind")[0]
-            summary = "Genotype impacts exposure/tolerability" if (d6var or c19var) else "Typical exposure"
+        c19var = 1 in get_genotype("CYP2C19 variants", "ind")[0]
+        summary = "Genotype impacts exposure/tolerability" if (d6var or c19var) else "Typical exposure"
 
     elif trait == "Carbamazepine hypersensitivity":
         b1502 = 1 in get_genotype("HLA-B*15:02", "ind")[0]
