@@ -935,6 +935,48 @@ if selected:
             summary = ("Alcohol flush present" if any(gt)
                        else "Alcohol flush not present")
 
+        # ── New Dermatology Traits ──
+
+          elif trait == "Tanning Response":
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            if alt_count == 0:
+                summary = "Good tanning ability"
+            elif alt_count <= 2:
+                summary = "Intermediate tanning"
+            else:
+                summary = "Poor tanning / burns easily"
+
+        elif trait == "Lentigines (Sun Spots)":
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            if alt_count == 0:
+                summary = "Lower likelihood of sun spots"
+            elif alt_count == 1:
+                summary = "Moderate likelihood of sun spots"
+            else:
+                summary = "Higher likelihood of sun spots"
+
+        elif trait == "Wrinkle & Collagen Degradation":
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            if alt_count == 0:
+                summary = "Lower wrinkle susceptibility"
+            elif alt_count == 1:
+                summary = "Moderate wrinkle susceptibility"
+            else:
+                summary = "Higher wrinkle susceptibility"
+
+        elif trait == "Stretch Marks (Striae Distensae)":
+            alt_count = sum(get_genotype(s, "ind")[0].count(1)
+                            for s in info["snps"])
+            if alt_count == 0:
+                summary = "Lower stretch mark susceptibility"
+            elif alt_count == 1:
+                summary = "Moderate stretch mark susceptibility"
+            else:
+                summary = "Higher stretch mark susceptibility"
+                
         # Fallback
         else:
             summary = ""
