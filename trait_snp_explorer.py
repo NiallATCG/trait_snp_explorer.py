@@ -566,8 +566,241 @@ traits_info = {
 
     }
 }
-# 2. Mock genotype data
-# 2. Mock genotype data
+
+# --- Helper function to generate summaries for any trait ---
+def get_trait_summary(trait, info):
+    # Height
+    if trait == "Height":
+        return "N/A"
+
+    # Freckles
+    elif trait == "Freckles":
+        alt_count = sum(get_genotype(s, "ind")[0].count(1) for s in info["snps"])
+        if alt_count == 0: return "No freckles"
+        elif alt_count <= 2: return "Mild freckling"
+        else: return "Pronounced freckling"
+
+    # Hair Colour
+    elif trait == "Hair Colour":
+        alt_count = sum(get_genotype(s, "ind")[0].count(1) for s in info["snps"])
+        if alt_count == 0: return "Non-red hair"
+        elif alt_count == 1: return "Auburn hair"
+        else: return "True red hair"
+
+    # Eye Colour
+    elif trait == "Eye Colour":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        return "Blue eyes" if gt == [0,0] else "Brown eyes"
+
+    # Skin Tone
+    elif trait == "Skin Tone":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        if gt == [1,1]: return "Lighter skin tone"
+        elif gt[0] != gt[1]: return "Intermediate skin tone"
+        else: return "Darker skin tone"
+
+    # Earwax Type
+    elif trait == "Earwax Type":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        return "Dry earwax" if gt.count(1) == 2 else "Wet earwax"
+
+    # Lactose Intolerance
+    elif trait == "Lactose Intolerance":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        return "Lactose tolerant" if any(gt) else "Lactose intolerant"
+
+   # PTC Tasting: any ALT → can taste, else cannot
+    elif trait == "PTC Tasting":
+        alt_count = sum(get_genotype(s, "ind")[0].count(1)
+                        for s in info["snps"])
+        summary = "Can taste PTC" if alt_count > 0 else "Cannot taste PTC"
+
+    # Coriander Taste: any ALT → soapy perception, else normal
+    elif trait == "Coriander Taste":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        summary = ("Perceives coriander as soapy"
+                     if any(gt) else "Normal coriander taste")
+
+     # Red-Green Colourblindness: any ALT → colour blind, else not
+    elif trait == "Red-Green Colourblindness":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        summary = ("Red green colour blind" if any(gt)
+                    else "Not red green colour blind")
+
+    # Sprint Gene: any R allele (REF=0) → present, else absent
+    elif trait == "Sprint Gene":
+        gt = sorted(get_genotype(info["snps"][0], "ind")[0])
+        # REF allele (0) is “R”
+        sprint_present = 0 in gt
+        summary = ("Sprint gene present: better sprint performance"
+                    if sprint_present else "Sprint gene absent: reduced sprint")
+
+    # Alcohol Flush: any ALT → flush present, else not present
+    elif trait == "Alcohol Flush":
+        gt = get_genotype(info["snps"][0], "ind")[0]
+        summary = ("Alcohol flush present" if any(gt)
+                    else "Alcohol flush not present")
+
+    # ── New Dermatology Traits ──
+
+    elif trait == "Tanning Response":
+        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
+        summary = "Poor tanning / burns easily" if has_alt else "Good tanning ability"
+
+    elif trait == "Lentigines (Sun Spots)":
+        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
+        summary = "Higher likelihood of sun spots" if has_alt else "Lower likelihood of sun spots"
+
+    elif trait == "Wrinkle & Collagen Degradation":
+        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
+        summary = "Higher wrinkle susceptibility" if has_alt else "Lower wrinkle susceptibility"
+
+    elif trait == "Stretch Marks (Striae Distensae)":
+        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
+        summary = "Higher stretch mark susceptibility" if has_alt else "Lower stretch mark susceptibility"
+
+     # ── Genetic Response to Drugs summaries ──
+
+    elif trait == "Warfarin response":
+        vkorc1 = 1 in get_genotype("rs9923231", "ind")[0]
+        cyp2c9 = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C9*2", "CYP2C9*3"])
+        cyp4f2 = 1 in get_genotype("rs2108622", "ind")[0]
+        parts = []
+        if vkorc1: parts.append("↑ sensitivity (VKORC1)")
+        if cyp2c9: parts.append("↓ clearance (CYP2C9)")
+        if cyp4f2: parts.append("slightly ↑ dose (CYP4F2)")
+        summary = ", ".join(parts) if parts else "Typical response"
+
+    elif trait == "Statin myopathy risk":
+        slco1b1 = 1 in get_genotype("rs4149056", "ind")[0]
+        abcg2 = 1 in get_genotype("rs2231142", "ind")[0]
+        risk = slco1b1 or abcg2
+        summary = "Elevated myopathy risk" if risk else "Typical risk"
+
+    elif trait == "Clopidogrel response":
+        lof = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C19*2", "CYP2C19*3"])
+        gain = 1 in get_genotype("CYP2C19*17", "ind")[0]
+        summary = (
+            "Reduced activation (LOF)" if lof and not gain else
+            "Higher activity (CYP2C19*17)" if gain and not lof else
+            "Mixed metabolism (LOF + *17)" if lof and gain else
+            "Typical activation"
+         )
+
+    elif trait == "Dabigatran activation":
+        ces1 = 1 in get_genotype("CES1 variants", "ind")[0]
+        summary = "Altered activation (CES1)" if ces1 else "Typical activation"
+
+    elif trait == "Opioid analgesic response":
+        d6_loss = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2D6*3","CYP2D6*4","CYP2D6*5","CYP2D6*6"])
+        cnv = 1 in get_genotype("copy number", "ind")[0]
+        summary = "Altered opioid metabolism" if (d6_loss or cnv) else "Typical metabolism"
+
+    elif trait == "Atomoxetine response":
+        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
+        summary = "Higher atomoxetine exposure (dose reduce)" if d6var else "Typical exposure"
+
+    elif trait == "Tricyclic antidepressant response":
+        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
+        c19var = 1 in get_genotype("CYP2C19 variants", "ind")[0]
+        summary = "Genotype-guided dosing advised" if (d6var or c19var) else "Typical dosing"
+
+    elif trait == "SSRI response":
+        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
+            c19var = 1 in get_genotype("CYP2C19 variants", "ind")[0]
+            summary = "Genotype impacts exposure/tolerability" if (d6var or c19var) else "Typical exposure"
+
+    elif trait == "Carbamazepine hypersensitivity":
+        b1502 = 1 in get_genotype("HLA-B*15:02", "ind")[0]
+        a3101 = 1 in get_genotype("HLA-A*31:01", "ind")[0]
+        summary = "Elevated SJS/TEN risk" if (b1502 or a3101) else "Typical risk"
+
+    elif trait == "Phenytoin toxicity risk":
+        cyp2c9 = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C9*2","CYP2C9*3"])
+        b1502 = 1 in get_genotype("HLA-B*15:02", "ind")[0]
+        summary = "Higher toxicity risk" if (cyp2c9 or b1502) else "Typical risk"
+
+    elif trait == "Valproic acid and POLG":
+        polg = 1 in get_genotype("POLG mutations", "ind")[0]
+        summary = "Avoid valproate (POLG risk)" if polg else "Typical suitability"
+
+    elif trait == "Siponimod contraindication":
+        poor_cyp2c9 = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C9*2","CYP2C9*3"])
+        summary = "Genotype-guided use; contraindications possible" if poor_cyp2c9 else "Typical suitability"
+
+    elif trait == "Fluoropyrimidine toxicity risk":
+        dpyd_flags = any(1 in get_genotype(s, "ind")[0] for s in ["DPYD*2A","DPYD*13","rs67376798","rs75017182"])
+        summary = "High toxicity risk (DPYD)" if dpyd_flags else "Typical risk"
+
+    elif trait == "Irinotecan toxicity risk":
+        ugt = 1 in get_genotype("UGT1A1*28", "ind")[0]
+        summary = "Higher neutropenia risk (UGT1A1*28)" if ugt else "Typical risk"
+
+    elif trait == "Tamoxifen efficacy":
+        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
+        summary = "Potentially reduced efficacy (CYP2D6)" if d6var else "Typical efficacy"
+
+    elif trait == "Thiopurine toxicity risk":
+        tpmt = 1 in get_genotype("TPMT activity alleles", "ind")[0]
+        nudt15 = 1 in get_genotype("rs116855232", "ind")[0]
+        summary = "Severe myelosuppression risk" if (tpmt or nudt15) else "Typical risk"
+
+    elif trait == "Anthracycline cardiotoxicity markers":
+        rarg = 1 in get_genotype("RARG variants", "ind")[0]
+        slc28a3 = 1 in get_genotype("SLC28A3 variants", "ind")[0]
+        summary = "Higher cardiotoxicity risk" if (rarg or slc28a3) else "Typical risk"
+
+    elif trait == "Abacavir hypersensitivity":
+        b5701 = 1 in get_genotype("HLA-B*57:01", "ind")[0]
+        summary = "Contraindicated (HLA-B*57:01)" if b5701 else "Eligible"
+
+    elif trait == "Allopurinol severe skin reaction risk":
+        b5801 = 1 in get_genotype("HLA-B*58:01", "ind")[0]
+        summary = "High SCAR risk (HLA-B*58:01)" if b5801 else "Typical risk"
+
+    elif trait == "Flucloxacillin liver injury risk":
+        b5701 = 1 in get_genotype("HLA-B*57:01", "ind")[0]
+        summary = "Higher DILI risk (HLA-B*57:01)" if b5701 else "Typical risk"
+
+    elif trait == "Efavirenz exposure":
+        c2b6 = 1 in get_genotype("rs3745274", "ind")[0]
+        summary = "Higher exposure; dose reduce" if c2b6 else "Typical exposure"
+
+    elif trait == "Atazanavir hyperbilirubinaemia":
+        ugt = 1 in get_genotype("UGT1A1*28 (atazanavir)", "ind")[0]
+        summary = "Benign hyperbilirubinaemia likely" if ugt else "Typical likelihood"
+
+    elif trait == "Voriconazole dosing":
+        cyp = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C19*2", "CYP2C19*3", "CYP2C19*17"])
+        summary = "Genotype-guided dosing advised" if cyp else "Typical dosing"
+
+    elif trait == "Tacrolimus dosing":
+        cyp3a5 = 1 in get_genotype("CYP3A5*3 (rs776746)", "ind")[0]
+        summary = "Lower dose (non-expressor)" if cyp3a5 else "Higher dose (expressor)"
+
+    elif trait == "Thiopurine dosing (transplant)":
+        tpmt = 1 in get_genotype("TPMT activity alleles", "ind")[0]
+        nudt15 = 1 in get_genotype("rs116855232", "ind")[0]
+        summary = "Reduce dose / alternative" if (tpmt or nudt15) else "Typical dosing"
+
+    elif trait == "Mycophenolate response (research)":
+        impdh = 1 in get_genotype("IMPDH variants", "ind")[0]
+        summary = "Potential impact; evidence emerging" if impdh else "Typical response"
+
+    elif trait == "Smoking cessation pharmacogenetics":
+        chrna5 = 1 in get_genotype("rs16969968", "ind")[0]
+        cyp2a6 = 1 in get_genotype("CYP2A6 activity alleles", "ind")[0]
+        summary = "Tailor therapy (nicotine dependence/clearance)" if (chrna5 or cyp2a6) else "Typical response"
+
+    elif trait == "Bupropion dosing":
+        c2b6 = 1 in get_genotype("rs3745274", "ind")[0]
+        summary = "Dose adjust (CYP2B6)" if c2b6 else "Typical dosing"
+          
+    # Fallback
+    else:
+        summary = "Summary missing"
+
+# Mock genotype data
 mock_vcf_data = {
     snp: {
         "ref": d["ref"], "alt": d["alt"],
