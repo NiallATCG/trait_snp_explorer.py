@@ -668,6 +668,30 @@ mock_vcf_data = {
     }.items()
 
 }
+
+# Add missing dermatology SNPs and pharmacogenetic symbolic variants
+mock_vcf_data.update({
+    "rs12203592": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "rs6058017":  {"ref":"G","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2C9*2": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,1]},
+    "CYP2C9*3": {"ref":"A","alt":"C","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2C19*2": {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2C19*3": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "CYP2C19*17": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2D6*3": {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2D6*4": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "CYP2D6*5": {"ref":"del","alt":"-","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "CYP2D6*6": {"ref":"T","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2D6 variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "CYP2A6 activity alleles": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "TPMT activity alleles": {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "IMPDH variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "RARG variants": {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "SLC28A3 variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "CES1 variants": {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "POLG mutations": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+})
+
 # 3. ClinVar & gnomAD fetchers
 @st.cache_data(ttl=24*3600)
 def fetch_clinvar(rsid):
