@@ -955,17 +955,17 @@ if selected:
         print("   SNP list:", info["snps"])
 
         for s in info["snps"]:
-        try:
-            gt = get_genotype(s, "ind")[0]
-            print("   SNP:", s, "Genotype:", gt)
-        except KeyError:
-            print("   MISSING SNP:", s)
+            try:
+                gt = get_genotype(s, "ind")[0]
+                print("   SNP:", s, "Genotype:", gt)
+            except KeyError:
+                print("   MISSING SNP:", s)
 
         # Old style consolidated view
         try:
-        print("   All genotypes:", [get_genotype(s, "ind")[0] for s in info["snps"]])
+            print("   All genotypes:", [get_genotype(s, "ind")[0] for s in info["snps"]])
         except Exception as e:
-        print("   ERROR retrieving genotypes:", e)
+            print("   ERROR retrieving genotypes:", e)
 
                 # Height is not SNP-based
         if trait == "Height":
