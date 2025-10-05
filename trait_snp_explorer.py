@@ -567,6 +567,7 @@ traits_info = {
     }
 }
 # 2. Mock genotype data
+# 2. Mock genotype data
 mock_vcf_data = {
     snp: {
         "ref": d["ref"], "alt": d["alt"],
@@ -626,26 +627,26 @@ mock_vcf_data = {
         # Smoking Cessation
         "rs16969968": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CHRNA5
 
+        # ── Dermatology traits ──
         # Tanning response
-        "rs12913832": {"ref":"A","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,1]},  # HERC2/OCA2
         "rs16891982": {"ref":"C","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},  # SLC45A2
         "rs1042602":  {"ref":"C","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # TYR
-    
+
         # Lentigines
         "rs6058017":  {"ref":"G","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # ASIP
-    
-        # Wrinkle & collagen degradation
+
+         # Wrinkle & collagen degradation
         "rs1799750":  {"ref":"1","alt":"2","mother":[0,1],"father":[0,0],"gt":[0,1]},  # MMP1 promoter ins/del
         "rs6469206":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # MMP16
         "rs805698":   {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},  # COL17A1
         "rs4880":     {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # SOD2
-    
+
         # Stretch marks
         "rs3757587":  {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # ELN
         "rs2118181":  {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},  # FBN1
         "rs1800012":  {"ref":"G","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},  # COL1A1
         "rs7999168":  {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},  # HMCN1
-        
+                                                     
     }.items()
 
 }
