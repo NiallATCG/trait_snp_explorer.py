@@ -780,7 +780,11 @@ def get_trait_summary(trait, info):
 
     else:
         return f"Summary missing for {trait}"
-
+# --- UI: trait selection ---
+selected = st.multiselect(
+    "Select traits to explore",
+    options=list(traits_info.keys())
+)
 #  individual trait display loop
 
 if selected:
@@ -1174,10 +1178,17 @@ if selected:
     rows = []
     for trait in selected:
         info = traits_info[trait]
-        summary = get_trait_summary(trait, info)   # ✅ use the helper here
+        summary = get_trait_summary(trait, info)   # ✅ use helper
         rows.append({"Trait": trait, "Summary": summary})
-
     st.table(pd.DataFrame(rows))
+
+# --- Individual trait display ---
+for trait in selected:
+    info = traits_info[trait]
+    st.subheader(trait)
+    st.write(info["description"])
+    st.write(info["overview"])
+    st.markdown(f"**Summary:** {get_trait_summary(trait, info)}")
 
 # Height on predictor page
 if page=="Child Phenome Predictor" and "Height" in selected:
