@@ -564,7 +564,6 @@ traits_info = {
             "CYP2B6 genotype influences bupropion levels for depression and smoking cessation. Dose tailoring can improve tolerability."
  
         )
-    }
 }
 
 # 2. Mock genotype data
