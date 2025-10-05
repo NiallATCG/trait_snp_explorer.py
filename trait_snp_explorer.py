@@ -760,7 +760,7 @@ def get_trait_summary(trait, info):
         cyp3a5 = 1 in get_genotype("CYP3A5*3 (rs776746)", "ind")[0]
         return "Lower dose (non-expressor)" if cyp3a5 else "Higher dose (expressor)"
 
-        elif trait == "Thiopurine dosing (transplant)":
+    elif trait == "Thiopurine dosing (transplant)":
         tpmt = 1 in get_genotype("TPMT activity alleles", "ind")[0]
         nudt15 = 1 in get_genotype("rs116855232", "ind")[0]
         return "Reduce dose / alternative needed" if (tpmt or nudt15) else "Typical dosing"
