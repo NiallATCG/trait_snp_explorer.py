@@ -51,6 +51,7 @@ traits_info = {
             "genes are located on the X chromosome, inheritance is X‑linked recessive: males need "
             "only one altered copy to be affected, while females require two."
         )
+     },
     "Tanning Response": {
         "gene": "MC1R; ASIP; IRF4; HERC2/OCA2; SLC45A2; TYR",
         "snps": ["rs1805007", "rs12203592", "rs12913832", "rs16891982", "rs1042602"],
@@ -66,7 +67,6 @@ traits_info = {
             "Together, these variants determine tanning vs. burning tendency."
         )
     },
-
     "Lentigines (Sun Spots)": {
         "gene": "MC1R; HERC2/OCA2; ASIP",
         "snps": ["rs1805007", "rs12913832", "rs6058017"],
@@ -96,7 +96,6 @@ traits_info = {
             "pronounced wrinkling."
         )
     },
-
     "Stretch Marks (Striae Distensae)": {
         "gene": "ELN; FBN1; COL1A1; HMCN1",
         "snps": ["rs3757587", "rs2118181", "rs1800012", "rs7999168"],
@@ -564,8 +563,9 @@ traits_info = {
             "CYP2B6 genotype influences bupropion levels for depression and smoking cessation. Dose tailoring can improve tolerability."
  
         )
-}
 
+    }
+}
 # 2. Mock genotype data
 mock_vcf_data = {
     snp: {
