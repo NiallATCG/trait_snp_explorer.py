@@ -692,6 +692,56 @@ mock_vcf_data.update({
     "POLG mutations": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
 })
 
+# Complete mock entries for Psychiatry/Neurology, Oncology, Infectious Disease, Immunosuppression
+mock_vcf_data.update({
+    # ── Psychiatry & Neurology ──
+    "CYP2D6*3": {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "CYP2D6*4": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "CYP2D6*5": {"ref":"del","alt":"-","mother":[0,0],"father":[0,1],"gt":[0,0]},  # deletion (null)
+    "CYP2D6*6": {"ref":"T","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "copy number": {"ref":"2","alt":"3","mother":[0,0],"father":[0,1],"gt":[0,0]},  # CNV placeholder
+    "CYP2D6 variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+
+    "CYP2C19 variants": {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},  # generic placeholder
+
+    "HLA-B*15:02": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "HLA-A*31:01": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+
+    "CYP2C9*2": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,1]},
+    "CYP2C9*3": {"ref":"A","alt":"C","mother":[0,1],"father":[0,0],"gt":[0,1]},
+
+    "POLG mutations": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+
+    # ── Oncology ──
+    "DPYD*2A": {"ref":"G","alt":"A","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "DPYD*13": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},
+
+    "UGT1A1*28": {"ref":"TA6","alt":"TA7","mother":[0,1],"father":[0,0],"gt":[0,1]},
+
+    "TPMT activity alleles": {"ref":"A","alt":"G","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "RARG variants": {"ref":"G","alt":"A","mother":[0,1],"father":[0,0],"gt":[0,1]},
+    "SLC28A3 variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+
+    # ── Infectious Disease ──
+    "HLA-B*57:01": {"ref":"T","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,0]},
+    "HLA-B*58:01": {"ref":"C","alt":"T","mother":[0,1],"father":[0,0],"gt":[0,1]},
+
+    # Alias for Atazanavir use case
+    "UGT1A1*28 (atazanavir)": {"ref":"TA6","alt":"TA7","mother":[0,1],"father":[0,0],"gt":[0,1]},
+
+    # ── Immunosuppression & Transplant ──
+    "CYP3A5*3": {"ref":"A","alt":"G","mother":[0,0],"father":[0,1],"gt":[0,0]},  # alias for rs776746
+
+    "IMPDH variants": {"ref":"C","alt":"T","mother":[0,0],"father":[0,1],"gt":[0,0]},
+})
+
+missing = []
+for trait, info in traits_info.items():
+    for s in info["snps"]:
+        if s not in mock_vcf_data:
+            missing.append((trait, s))
+print("Missing SNPs:", missing)
+
 # 3. ClinVar & gnomAD fetchers
 @st.cache_data(ttl=24*3600)
 def fetch_clinvar(rsid):
