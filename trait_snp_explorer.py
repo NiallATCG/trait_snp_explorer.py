@@ -799,7 +799,11 @@ def get_trait_summary(trait, info):
     # Fallback
     else:
         summary = "Summary missing"
-
+# --- UI: trait selection ---
+selected = st.multiselect(
+    "Select traits to explore",
+    options=list(traits_info.keys())
+)
 # Mock genotype data
 mock_vcf_data = {
     snp: {
@@ -1159,7 +1163,6 @@ report_groups = {
         ]
     }
 }
-# 2. Update the UI logic
 
 # Dropdown for report selection
 report = st.selectbox("Select Report", list(report_groups.keys()), index=1)
