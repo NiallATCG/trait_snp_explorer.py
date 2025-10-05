@@ -937,7 +937,7 @@ if selected:
 
         # ── New Dermatology Traits ──
 
-          elif trait == "Tanning Response":
+        elif trait == "Tanning Response":
             alt_count = sum(get_genotype(s, "ind")[0].count(1)
                             for s in info["snps"])
             if alt_count == 0:
