@@ -956,23 +956,22 @@ if selected:
 
         # ── New Dermatology Traits ──
 
-                # ── New Dermatology Traits ──
-
         elif trait == "Tanning Response":
-            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
             summary = "Poor tanning / burns easily" if has_alt else "Good tanning ability"
 
         elif trait == "Lentigines (Sun Spots)":
-            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
             summary = "Higher likelihood of sun spots" if has_alt else "Lower likelihood of sun spots"
 
         elif trait == "Wrinkle & Collagen Degradation":
-            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
             summary = "Higher wrinkle susceptibility" if has_alt else "Lower wrinkle susceptibility"
 
         elif trait == "Stretch Marks (Striae Distensae)":
-            has_alt = any(any(get_genotype(s, "ind")[0]) for s in info["snps"])
+            has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
             summary = "Higher stretch mark susceptibility" if has_alt else "Lower stretch mark susceptibility"
+
                 
         # Fallback
         else:
