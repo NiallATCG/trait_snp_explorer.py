@@ -950,10 +950,24 @@ if selected:
     for trait in selected:
         info = traits_info[trait]
 
-        # 🔎 Debug: show trait name and genotypes being used
-        print("DEBUG:", trait, [get_genotype(s, "ind")[0] for s in info["snps"]])
-        
-        # Height is not SNP-based
+        # 🔎 Debugging block
+        print("DEBUG Trait:", trait)
+        print("   SNP list:", info["snps"])
+
+        for s in info["snps"]:
+        try:
+            gt = get_genotype(s, "ind")[0]
+            print("   SNP:", s, "Genotype:", gt)
+        except KeyError:
+            print("   MISSING SNP:", s)
+
+        # Old style consolidated view
+        try:
+        print("   All genotypes:", [get_genotype(s, "ind")[0] for s in info["snps"]])
+        except Exception as e:
+        print("   ERROR retrieving genotypes:", e)
+
+                # Height is not SNP-based
         if trait == "Height":
             summary = "N/A"
 
