@@ -1101,6 +1101,9 @@ def download_from_gdrive(gdrive_url):
 
         download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
         r = requests.get(download_url)
+        st.write("Download status:", r.status_code)
+        st.write("Download URL:", download_url)
+        st.write("Downloaded bytes:", len(r.content))
         r.raise_for_status()
 
         # Write to a temporary file so downstream code can use a file path
