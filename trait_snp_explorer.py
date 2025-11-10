@@ -1168,7 +1168,7 @@ else:
 
 # --- Highlight demo mode ---
     if using_demo_data:
-    st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
+        st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
 
 # Define report groups
 report_groups = {
