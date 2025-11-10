@@ -1,7 +1,7 @@
 streamlit
-cyvcf2
 numpy
 pandas
 altair
 requests
+cyvcf2
 gdown
