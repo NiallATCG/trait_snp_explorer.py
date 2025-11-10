@@ -1086,58 +1086,15 @@ page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"]
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
-import requests
-import tempfile
+# ---  Define Google cloud uploaded  ---
+import gdown
 
 def download_from_gdrive(gdrive_url):
     """Download a file from Google Drive using requests, handling large-file confirmation."""
-    try:
-        # Extract file ID
-        if "/d/" in gdrive_url:
-            file_id = gdrive_url.split("/d/")[1].split("/")[0]
-        elif "id=" in gdrive_url:
-            file_id = gdrive_url.split("id=")[1].split("&")[0]
-        else:
-            raise ValueError("Invalid Google Drive URL format")
-
-        session = requests.Session()
-        base_url = "https://drive.google.com/uc?export=download"
-
-        # First request
-        response = session.get(base_url, params={"id": file_id}, stream=True)
-        response.raise_for_status()
-
-        st.write("Download status:", response.status_code)
-        st.write("Download URL:", response.url)
-
-        # Detect confirmation token
-        token = None
-        for key, value in response.cookies.items():
-            if key.startswith("download_warning"):
-                token = value
-
-        if token:
-            response = session.get(base_url, params={"id": file_id, "confirm": token}, stream=True)
-            response.raise_for_status()
-
-        # If we still got HTML instead of file, bail out
-        if "text/html" in response.headers.get("Content-Type", ""):
-            st.error("Got HTML page instead of file — check that the Drive file is shared publicly")
-            st.write("Downloaded bytes:", len(response.content))
-            return None
-
-        # Stream to temp file
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".vcf")
-        size = 0
-        for chunk in response.iter_content(32768):
-            if chunk:
-                tmp.write(chunk)
-                size += len(chunk)
-        tmp.close()
-
-        st.write("Downloaded bytes:", size)
-        return tmp.name
-
+   try:
+        tmp_path = "temp_download.vcf"
+        gdown.download(gdrive_url, tmp_path, quiet=False)
+        return tmp_path
     except Exception as e:
         st.error(f"Failed to download from Google Drive: {e}")
         return None
