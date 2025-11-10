@@ -567,234 +567,466 @@ traits_info = {
     }
 }
 
-# --- Helper function to generate summaries for any trait ---
-def get_trait_summary(trait, info):
-    # Height
+# --- Helper function to generate summaries for any trait ----
+# Edited to differentiate between demo and real data
+def get_trait_summary(trait, info, vcf_obj=None, sample=None):
+    """
+    Generate a summary for a given trait using either demo data or real VCF genotypes.
+    - trait: trait name string
+    - info: trait metadata dict (with snps list, etc.)
+    - vcf_obj: cyvcf2.VCF object if using real data
+    - sample: sample name string selected from the VCF
+    """
+
+    # Height (polygenic, no SNPs)
     if trait == "Height":
         return "N/A"
 
-    # Freckles
+    # Freckles (MC1R variants)
     elif trait == "Freckles":
-        alt_count = sum(get_genotype(s, "ind")[0].count(1) for s in info["snps"])
-        if alt_count == 0: return "No freckles"
-        elif alt_count <= 2: return "Mild freckling"
-        else: return "Pronounced freckling"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "No freckles"
+        elif alt_count <= 2:
+            return "Mild freckling"
+        else:
+            return "Pronounced freckling"
 
-    # Hair Colour
+    # Hair Colour (MC1R variants)
     elif trait == "Hair Colour":
-        alt_count = sum(get_genotype(s, "ind")[0].count(1) for s in info["snps"])
-        if alt_count == 0: return "Non-red hair"
-        elif alt_count == 1: return "Auburn hair"
-        else: return "True red hair"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Non-red hair"
+        elif alt_count == 1:
+            return "Auburn hair"
+        else:
+            return "True red hair"
 
-    # Eye Colour
+    # Eye Colour (HERC2 rs12913832)
     elif trait == "Eye Colour":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        return "Blue eyes" if gt == [0,0] else "Brown eyes"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        return "Blue eyes" if gt == [0, 0] else "Brown eyes"
 
-    # Skin Tone
+    # Skin Tone (SLC24A5 rs1426654)
     elif trait == "Skin Tone":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        if gt == [1,1]: return "Lighter skin tone"
-        elif gt[0] != gt[1]: return "Intermediate skin tone"
-        else: return "Darker skin tone"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if gt == [1, 1]:
+            return "Lighter skin tone"
+        elif gt == [0, 1] or gt == [1, 0]:
+            return "Intermediate skin tone"
+        else:
+            return "Darker skin tone"
 
-    # Earwax Type
+    # Earwax Type (ABCC11 rs17822931)
     elif trait == "Earwax Type":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        return "Dry earwax" if gt.count(1) == 2 else "Wet earwax"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if gt == [1, 1]:
+            return "Dry earwax"
+        else:
+            return "Wet earwax"
 
-    # Lactose Intolerance
+    # Lactose Intolerance (MCM6 rs4988235)
     elif trait == "Lactose Intolerance":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        return "Lactose tolerant" if any(gt) else "Lactose intolerant"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:  # at least one T allele
+            return "Lactose tolerant"
+        else:
+            return "Lactose intolerant"
 
-   # PTC Tasting: any ALT → can taste, else cannot
+    # PTC Tasting (TAS2R38 haplotypes)
     elif trait == "PTC Tasting":
-        alt_count = sum(get_genotype(s, "ind")[0].count(1)
-                        for s in info["snps"])
-        summary = "Can taste PTC" if alt_count > 0 else "Cannot taste PTC"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Non-taster"
+        elif alt_count == 1:
+            return "Mild taster"
+        else:
+            return "Strong taster"
 
-    # Coriander Taste: any ALT → soapy perception, else normal
+    # Coriander Taste (OR6A2 rs72921001)
     elif trait == "Coriander Taste":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        summary = ("Perceives coriander as soapy"
-                     if any(gt) else "Normal coriander taste")
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Soapy coriander perception"
+        else:
+            return "Normal coriander perception"
 
-     # Red-Green Colourblindness: any ALT → colour blind, else not
-    elif trait == "Red-Green Colourblindness":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        summary = ("Red green colour blind" if any(gt)
-                    else "Not red green colour blind")
-
-    # Sprint Gene: any R allele (REF=0) → present, else absent
+    # Sprint Gene (ACTN3 rs1815739)
     elif trait == "Sprint Gene":
-        gt = sorted(get_genotype(info["snps"][0], "ind")[0])
-        # REF allele (0) is “R”
-        sprint_present = 0 in gt
-        summary = ("Sprint gene present: better sprint performance"
-                    if sprint_present else "Sprint gene absent: reduced sprint")
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if gt == [0, 0]:
+            return "Normal sprint performance"
+        elif gt == [0, 1] or gt == [1, 0]:
+            return "Intermediate sprint performance"
+        else:
+            return "Reduced sprint performance"
 
-    # Alcohol Flush: any ALT → flush present, else not present
+    # Alcohol Flush (ALDH2 rs671)
     elif trait == "Alcohol Flush":
-        gt = get_genotype(info["snps"][0], "ind")[0]
-        summary = ("Alcohol flush present" if any(gt)
-                    else "Alcohol flush not present")
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Alcohol flush reaction"
+        else:
+            return "No flush reaction"
 
     # ── New Dermatology Traits ──
 
+   # Tanning Response (MC1R, IRF4, HERC2/OCA2, SLC45A2, TYR)
     elif trait == "Tanning Response":
-        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
-        summary = "Poor tanning / burns easily" if has_alt else "Good tanning ability"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal tanning response"
+        elif alt_count <= 2:
+            return "Reduced tanning ability"
+        else:
+            return "Burn‑prone, poor tanning"
 
+    # Lentigines (Sun Spots) (MC1R, HERC2/OCA2, ASIP)
     elif trait == "Lentigines (Sun Spots)":
-        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
-        summary = "Higher likelihood of sun spots" if has_alt else "Lower likelihood of sun spots"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Low risk of sun spots"
+        elif alt_count <= 2:
+            return "Moderate risk of sun spots"
+        else:
+            return "High risk of sun spots"
 
+    # Wrinkle & Collagen Degradation (MMP1, MMP16, COL17A1, SOD2)
     elif trait == "Wrinkle & Collagen Degradation":
-        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
-        summary = "Higher wrinkle susceptibility" if has_alt else "Lower wrinkle susceptibility"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal collagen resilience"
+        elif alt_count <= 2:
+            return "Moderate wrinkle risk"
+        else:
+            return "High wrinkle risk"
 
+    # Stretch Marks (Striae Distensae) (ELN, FBN1, COL1A1, HMCN1)
     elif trait == "Stretch Marks (Striae Distensae)":
-        has_alt = any(1 in get_genotype(s, "ind")[0] for s in info["snps"])
-        summary = "Higher stretch mark susceptibility" if has_alt else "Lower stretch mark susceptibility"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Low susceptibility to stretch marks"
+        elif alt_count <= 2:
+            return "Moderate susceptibility to stretch marks"
+        else:
+            return "High susceptibility to stretch marks"
 
      # ── Genetic Response to Drugs summaries ──
 
-    elif trait == "Warfarin response":
-        vkorc1 = 1 in get_genotype("rs9923231", "ind")[0]
-        cyp2c9 = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C9*2", "CYP2C9*3"])
-        cyp4f2 = 1 in get_genotype("rs2108622", "ind")[0]
-        parts = []
-        if vkorc1: parts.append("↑ sensitivity (VKORC1)")
-        if cyp2c9: parts.append("↓ clearance (CYP2C9)")
-        if cyp4f2: parts.append("slightly ↑ dose (CYP4F2)")
-        summary = ", ".join(parts) if parts else "Typical response"
+     # Warfarin response (VKORC1, CYP2C9, CYP4F2)
+    if trait == "Warfarin response":
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal warfarin sensitivity"
+        elif alt_count <= 2:
+            return "Moderate sensitivity to warfarin"
+        else:
+            return "High sensitivity — lower dose likely required"
 
+    # Statin myopathy risk (SLCO1B1, ABCG2)
     elif trait == "Statin myopathy risk":
-        slco1b1 = 1 in get_genotype("rs4149056", "ind")[0]
-        abcg2 = 1 in get_genotype("rs2231142", "ind")[0]
-        risk = slco1b1 or abcg2
-        summary = "Elevated myopathy risk" if risk else "Typical risk"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Low risk of statin myopathy"
+        elif alt_count == 1:
+            return "Moderate risk of statin myopathy"
+        else:
+            return "High risk of statin myopathy"
 
+    # Clopidogrel response (CYP2C19 variants)
     elif trait == "Clopidogrel response":
-        lof = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C19*2", "CYP2C19*3"])
-        gain = 1 in get_genotype("CYP2C19*17", "ind")[0]
-        summary = (
-            "Reduced activation (LOF)" if lof and not gain else
-            "Higher activity (CYP2C19*17)" if gain and not lof else
-            "Mixed metabolism (LOF + *17)" if lof and gain else
-            "Typical activation"
-         )
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal clopidogrel metabolism"
+        elif alt_count == 1:
+            return "Reduced clopidogrel activation"
+        else:
+            return "Poor clopidogrel metabolism — reduced efficacy"
 
+    # Dabigatran activation (CES1 variants)
     elif trait == "Dabigatran activation":
-        ces1 = 1 in get_genotype("CES1 variants", "ind")[0]
-        summary = "Altered activation (CES1)" if ces1 else "Typical activation"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Altered dabigatran activation"
+        else:
+            return "Normal dabigatran activation"
 
+    # Opioid analgesic response (CYP2D6 variants)
     elif trait == "Opioid analgesic response":
-        d6_loss = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2D6*3","CYP2D6*4","CYP2D6*5","CYP2D6*6"])
-        cnv = 1 in get_genotype("copy number", "ind")[0]
-        summary = "Altered opioid metabolism" if (d6_loss or cnv) else "Typical metabolism"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal opioid metabolism"
+        elif alt_count == 1:
+            return "Reduced opioid metabolism"
+        else:
+            return "Poor opioid metabolism — risk of treatment failure"
 
+    # Atomoxetine response (CYP2D6 variants)
     elif trait == "Atomoxetine response":
-        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
-        summary = "Higher atomoxetine exposure (dose reduce)" if d6var else "Typical exposure"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Altered atomoxetine clearance"
+        else:
+            return "Normal atomoxetine clearance"
 
+    # Tricyclic antidepressant response (CYP2D6, CYP2C19)
     elif trait == "Tricyclic antidepressant response":
-        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
-        c19var = 1 in get_genotype("CYP2C19 variants", "ind")[0]
-        summary = "Genotype-guided dosing advised" if (d6var or c19var) else "Typical dosing"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal TCA metabolism"
+        elif alt_count == 1:
+            return "Intermediate TCA metabolism"
+        else:
+            return "Poor TCA metabolism — higher toxicity risk"
 
+    # SSRI response (CYP2D6, CYP2C19)
     elif trait == "SSRI response":
-        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
-        c19var = 1 in get_genotype("CYP2C19 variants", "ind")[0]
-        summary = "Genotype impacts exposure/tolerability" if (d6var or c19var) else "Typical exposure"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal SSRI metabolism"
+        elif alt_count == 1:
+            return "Intermediate SSRI metabolism"
+        else:
+            return "Poor SSRI metabolism — higher side effect risk"
 
+    # Carbamazepine hypersensitivity (HLA alleles)
     elif trait == "Carbamazepine hypersensitivity":
-        b1502 = 1 in get_genotype("HLA-B*15:02", "ind")[0]
-        a3101 = 1 in get_genotype("HLA-A*31:01", "ind")[0]
-        summary = "Elevated SJS/TEN risk" if (b1502 or a3101) else "Typical risk"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "High risk of carbamazepine hypersensitivity"
+        else:
+            return "Low risk of carbamazepine hypersensitivity"
 
+    # Phenytoin toxicity risk (CYP2C9, HLA-B)
     elif trait == "Phenytoin toxicity risk":
-        cyp2c9 = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C9*2","CYP2C9*3"])
-        b1502 = 1 in get_genotype("HLA-B*15:02", "ind")[0]
-        summary = "Higher toxicity risk" if (cyp2c9 or b1502) else "Typical risk"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal phenytoin metabolism"
+        elif alt_count == 1:
+            return "Intermediate phenytoin metabolism"
+        else:
+            return "Poor phenytoin metabolism — toxicity risk"
 
+    # Valproic acid and POLG
     elif trait == "Valproic acid and POLG":
-        polg = 1 in get_genotype("POLG mutations", "ind")[0]
-        summary = "Avoid valproate (POLG risk)" if polg else "Typical suitability"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "POLG variant detected — valproate contraindicated"
+        else:
+            return "No POLG variant detected"
 
+    # Siponimod contraindication (CYP2C9)
     elif trait == "Siponimod contraindication":
-        poor_cyp2c9 = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C9*2","CYP2C9*3"])
-        summary = "Genotype-guided use; contraindications possible" if poor_cyp2c9 else "Typical suitability"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if gt == [1, 1]:
+            return "Siponimod contraindicated (poor metaboliser)"
+        else:
+            return "Siponimod use permissible"
 
+    # Fluoropyrimidine toxicity risk (DPYD variants)
     elif trait == "Fluoropyrimidine toxicity risk":
-        dpyd_flags = any(1 in get_genotype(s, "ind")[0] for s in ["DPYD*2A","DPYD*13","rs67376798","rs75017182"])
-        summary = "High toxicity risk (DPYD)" if dpyd_flags else "Typical risk"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal fluoropyrimidine metabolism"
+        elif alt_count == 1:
+            return "Intermediate risk of toxicity"
+        else:
+            return "High risk of severe fluoropyrimidine toxicity"
 
+    # Irinotecan toxicity risk (UGT1A1*28)
     elif trait == "Irinotecan toxicity risk":
-        ugt = 1 in get_genotype("UGT1A1*28", "ind")[0]
-        summary = "Higher neutropenia risk (UGT1A1*28)" if ugt else "Typical risk"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Reduced UGT1A1 activity — higher toxicity risk"
+        else:
+            return "Normal UGT1A1 activity"
 
+    # Tamoxifen efficacy (CYP2D6 variants)
     elif trait == "Tamoxifen efficacy":
-        d6var = 1 in get_genotype("CYP2D6 variants", "ind")[0]
-        summary = "Potentially reduced efficacy (CYP2D6)" if d6var else "Typical efficacy"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal tamoxifen metabolism"
+        elif alt_count == 1:
+            return "Reduced tamoxifen metabolism"
+        else:
+            return "Poor tamoxifen metabolism — reduced efficacy"
 
+    # Thiopurine toxicity risk (TPMT; NUDT15)
     elif trait == "Thiopurine toxicity risk":
-        tpmt = 1 in get_genotype("TPMT activity alleles", "ind")[0]
-        nudt15 = 1 in get_genotype("rs116855232", "ind")[0]
-        summary = "Severe myelosuppression risk" if (tpmt or nudt15) else "Typical risk"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal thiopurine metabolism"
+        elif alt_count == 1:
+            return "Intermediate thiopurine metabolism"
+        else:
+            return "High risk of thiopurine toxicity"
 
+    # Anthracycline cardiotoxicity markers (RARG; SLC28A3)
     elif trait == "Anthracycline cardiotoxicity markers":
-        rarg = 1 in get_genotype("RARG variants", "ind")[0]
-        slc28a3 = 1 in get_genotype("SLC28A3 variants", "ind")[0]
-        summary = "Higher cardiotoxicity risk" if (rarg or slc28a3) else "Typical risk"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal cardiotoxicity risk"
+        elif alt_count == 1:
+            return "Moderate cardiotoxicity risk"
+        else:
+            return "High cardiotoxicity risk"
 
+    # Abacavir hypersensitivity (HLA-B*57:01)
     elif trait == "Abacavir hypersensitivity":
-        b5701 = 1 in get_genotype("HLA-B*57:01", "ind")[0]
-        summary = "Contraindicated (HLA-B*57:01)" if b5701 else "Eligible"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "High risk of abacavir hypersensitivity"
+        else:
+            return "Low risk of abacavir hypersensitivity"
 
+    # Allopurinol severe skin reaction risk (HLA-B*58:01)
     elif trait == "Allopurinol severe skin reaction risk":
-        b5801 = 1 in get_genotype("HLA-B*58:01", "ind")[0]
-        summary = "High SCAR risk (HLA-B*58:01)" if b5801 else "Typical risk"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "High risk of severe skin reaction to allopurinol"
+        else:
+            return "Low risk of severe skin reaction"
 
+    # Flucloxacillin liver injury risk (HLA-B*57:01)
     elif trait == "Flucloxacillin liver injury risk":
-        b5701 = 1 in get_genotype("HLA-B*57:01", "ind")[0]
-        summary = "Higher DILI risk (HLA-B*57:01)" if b5701 else "Typical risk"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Higher risk of flucloxacillin-induced liver injury"
+        else:
+            return "Normal risk of liver injury"
 
+    # Efavirenz exposure (CYP2B6 rs3745274)
     elif trait == "Efavirenz exposure":
-        c2b6 = 1 in get_genotype("rs3745274", "ind")[0]
-        summary = "Higher exposure; dose reduce" if c2b6 else "Typical exposure"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Poor metaboliser — higher efavirenz levels"
+        else:
+            return "Normal efavirenz clearance"
 
+    # Atazanavir hyperbilirubinaemia (UGT1A1*28)
     elif trait == "Atazanavir hyperbilirubinaemia":
-        ugt = 1 in get_genotype("UGT1A1*28 (atazanavir)", "ind")[0]
-        summary = "Benign hyperbilirubinaemia likely" if ugt else "Typical likelihood"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Higher risk of benign jaundice with atazanavir"
+        else:
+            return "Normal bilirubin metabolism"
 
+    # Voriconazole dosing (CYP2C19 variants)
     elif trait == "Voriconazole dosing":
-        cyp = any(1 in get_genotype(s, "ind")[0] for s in ["CYP2C19*2", "CYP2C19*3", "CYP2C19*17"])
-        summary = "Genotype-guided dosing advised" if cyp else "Typical dosing"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal voriconazole metabolism"
+        elif alt_count == 1:
+            return "Intermediate voriconazole metabolism"
+        else:
+            return "Poor voriconazole metabolism — dose adjustment needed"
 
+    # Tacrolimus dosing (CYP3A5*3)
     elif trait == "Tacrolimus dosing":
-        cyp3a5 = 1 in get_genotype("CYP3A5*3 (rs776746)", "ind")[0]
-        summary = "Lower dose (non-expressor)" if cyp3a5 else "Higher dose (expressor)"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "CYP3A5 non-expressor — lower tacrolimus clearance"
+        else:
+            return "CYP3A5 expressor — higher tacrolimus clearance"
 
+    # Thiopurine dosing (transplant) (TPMT; NUDT15)
     elif trait == "Thiopurine dosing (transplant)":
-        tpmt = 1 in get_genotype("TPMT activity alleles", "ind")[0]
-        nudt15 = 1 in get_genotype("rs116855232", "ind")[0]
-        summary = "Reduce dose / alternative" if (tpmt or nudt15) else "Typical dosing"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal thiopurine metabolism"
+        elif alt_count == 1:
+            return "Intermediate thiopurine metabolism"
+        else:
+            return "High risk of thiopurine toxicity"
 
+    # Mycophenolate response (research) (IMPDH variants)
     elif trait == "Mycophenolate response (research)":
-        impdh = 1 in get_genotype("IMPDH variants", "ind")[0]
-        summary = "Potential impact; evidence emerging" if impdh else "Typical response"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Potential altered mycophenolate response"
+        else:
+            return "Normal mycophenolate response"
 
+    # Smoking cessation pharmacogenetics (CYP2A6; CHRNA5)
     elif trait == "Smoking cessation pharmacogenetics":
-        chrna5 = 1 in get_genotype("rs16969968", "ind")[0]
-        cyp2a6 = 1 in get_genotype("CYP2A6 activity alleles", "ind")[0]
-        summary = "Tailor therapy (nicotine dependence/clearance)" if (chrna5 or cyp2a6) else "Typical response"
+        alt_count = sum(
+            get_genotype(s, "ind", vcf_obj, sample)[0].count(1)
+            for s in info["snps"]
+        )
+        if alt_count == 0:
+            return "Normal nicotine metabolism"
+        elif alt_count == 1:
+            return "Intermediate nicotine metabolism"
+        else:
+            return "Altered nicotine metabolism — may affect cessation outcomes"
 
+    # Bupropion dosing (CYP2B6 rs3745274)
     elif trait == "Bupropion dosing":
-        c2b6 = 1 in get_genotype("rs3745274", "ind")[0]
-        summary = "Dose adjust (CYP2B6)" if c2b6 else "Typical dosing"
+        gt, _ = get_genotype(info["snps"][0], "ind", vcf_obj, sample)
+        if 1 in gt:
+            return "Poor metaboliser — higher bupropion exposure"
+        else:
+            return "Normal bupropion metabolism"
           
     # Fallback
     else:
