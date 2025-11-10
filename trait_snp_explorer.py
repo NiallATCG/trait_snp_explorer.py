@@ -1093,7 +1093,11 @@ using_demo_data = False
 if page == "Individual":
     st.sidebar.subheader("Upload Individual VCF")
 
-    method = st.sidebar.radio("Choose upload method:", ["Local file", "Google Drive", "Demo data"])
+    method = st.sidebar.radio(
+        "Choose upload method:",
+        ["Local file", "Google Drive", "Demo data"],
+        index=0
+    )
 
     vcf_file = None
     if method == "Local file":
@@ -1102,9 +1106,11 @@ if page == "Individual":
         gdrive_url = st.sidebar.text_input("Paste Google Drive link")
         if gdrive_url:
             vcf_file = download_from_gdrive(gdrive_url)
-    else:  # Demo data
+    elif method == "Demo data":
         using_demo_data = True
         vcf_file = "demo_data/demo_individual.vcf"
+        # show the banner right here so it appears immediately
+        st.sidebar.warning("⚠️ Showing demo data for Individual mode")
 
     if vcf_file and VCF and not using_demo_data:
         vcf_ind = VCF(vcf_file)
@@ -1114,7 +1120,6 @@ if page == "Individual":
 else:
     st.sidebar.subheader("Upload Parental VCFs")
 
-    # Mother
     mom_method = st.sidebar.radio("Mother upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_mom = None
     if mom_method == "Local file":
@@ -1123,11 +1128,11 @@ else:
         gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
         if gdrive_mom:
             vcf_mom = download_from_gdrive(gdrive_mom)
-    else:
+    elif mom_method == "Demo data":
         using_demo_data = True
         vcf_mom = "demo_data/demo_mother.vcf"
+        st.sidebar.warning("⚠️ Showing demo data for Mother")
 
-    # Father
     dad_method = st.sidebar.radio("Father upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_dad = None
     if dad_method == "Local file":
@@ -1136,9 +1141,10 @@ else:
         gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
         if gdrive_dad:
             vcf_dad = download_from_gdrive(gdrive_dad)
-    else:
+    elif dad_method == "Demo data":
         using_demo_data = True
         vcf_dad = "demo_data/demo_father.vcf"
+        st.sidebar.warning("⚠️ Showing demo data for Father")
 
     if vcf_mom and VCF and not using_demo_data:
         vcf_m = VCF(vcf_mom)
@@ -1149,9 +1155,9 @@ else:
         sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
         use_real_vcf = True
 
-# --- Highlight demo mode (works for both Individual and Child Predictor) ---
-    if using_demo_data:
-        st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
+# --- Global banner if any demo data is active ---
+if using_demo_data:
+    st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
 
 # Define report groups
 report_groups = {
