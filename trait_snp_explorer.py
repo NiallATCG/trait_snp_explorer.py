@@ -579,24 +579,24 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
     - sample: sample name string selected from the VCF
     """
 
-    # Helper: count total ALT alleles across all SNPs safely
+        # Helper: count total ALT alleles across all SNPs safely
     def safe_alt_count(snps):
         total = 0
         for s in snps:
-            result = get_genotype(s, "ind", vcf_obj, sample)
+            result = get_genotype(s, "ind")   # only two args
             if result is None:
                 continue
-            gt, _ = result
+            gt, rec = result
             if gt is not None:
                 total += gt.count(1)
         return total
 
     # Helper: get single SNP genotype safely
     def safe_gt(snp):
-        result = get_genotype(snp, "ind", vcf_obj, sample)
+        result = get_genotype(snp, "ind")    # only two args
         if result is None:
             return None
-        gt, _ = result
+        gt, rec = result
         return gt
 
     # Height (polygenic, no SNPs)
