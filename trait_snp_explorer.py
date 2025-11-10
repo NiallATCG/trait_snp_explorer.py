@@ -1385,6 +1385,18 @@ if page == "Individual":
         )
         use_real_vcf = True
 
+#  Debug loop for checking if demo or real data
+    if vcf_ind and sample_ind and not using_demo_data:
+        st.subheader("Trait summaries from uploaded VCF")
+        for trait, info in traits_info.items():
+            summary = get_trait_summary(trait, info, vcf_ind, sample_ind)
+            st.write(f"{trait}: {summary}")
+    elif using_demo_data:
+        st.subheader("Trait summaries (DEMO DATA)")
+        for trait, info in traits_info.items():
+            summary = get_trait_summary(trait, info)  # demo path
+            st.write(f"{trait}: {summary}")
+
 else:
     using_demo_data = False   # reset for parental branch
     st.sidebar.subheader("Upload Parental VCFs")
@@ -1457,6 +1469,20 @@ else:
             key="father_sample_final"
         )
         use_real_vcf = True
+
+# ✅ Debug loops go here
+    if vcf_m and sample_mom and not using_demo_data:
+        st.subheader("Mother trait summaries from uploaded VCF")
+        for trait, info in traits_info.items():
+            summary = get_trait_summary(trait, info, vcf_m, sample_mom)
+            st.write(f"{trait}: {summary}")
+
+    if vcf_f and sample_dad and not using_demo_data:
+        st.subheader("Father trait summaries from uploaded VCF")
+        for trait, info in traits_info.items():
+            summary = get_trait_summary(trait, info, vcf_f, sample_dad)
+            st.write(f"{trait}: {summary}")
+
 
 # Global banner if demo mode is active
 if using_demo_data:
