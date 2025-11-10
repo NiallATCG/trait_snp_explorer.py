@@ -1087,7 +1087,8 @@ st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
 # --- VCF upload ---
-using_demo_data = False   # global flag
+
+using_demo_data = False
 
 if page == "Individual":
     st.sidebar.subheader("Upload Individual VCF")
