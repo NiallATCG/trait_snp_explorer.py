@@ -1086,6 +1086,34 @@ page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"]
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
+# ---  Define Google cloud uplaoded 
+
+def download_from_gdrive(gdrive_url):
+    """Download a file from Google Drive given a shareable link."""
+    try:
+        # Extract the file ID from a typical Google Drive share URL
+        if "/d/" in gdrive_url:
+            file_id = gdrive_url.split("/d/")[1].split("/")[0]
+        elif "id=" in gdrive_url:
+            file_id = gdrive_url.split("id=")[1].split("&")[0]
+        else:
+            raise ValueError("Invalid Google Drive URL format")
+
+        download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
+        r = requests.get(download_url)
+        r.raise_for_status()
+
+        # Write to a temporary file so downstream code can use a file path
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".vcf")
+        tmp.write(r.content)
+        tmp.close()
+        return tmp.name
+    except Exception as e:
+        st.error(f"Failed to download from Google Drive: {e}")
+        return None
+
+
 # --- VCF upload ---
 
 using_demo_data = False
@@ -1158,33 +1186,6 @@ else:
 # --- Global banner if any demo data is active ---
 if using_demo_data:
     st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
-
-# --- Google cloud uplaoded 
-
-def download_from_gdrive(gdrive_url):
-    """Download a file from Google Drive given a shareable link."""
-    try:
-        # Extract the file ID from a typical Google Drive share URL
-        if "/d/" in gdrive_url:
-            file_id = gdrive_url.split("/d/")[1].split("/")[0]
-        elif "id=" in gdrive_url:
-            file_id = gdrive_url.split("id=")[1].split("&")[0]
-        else:
-            raise ValueError("Invalid Google Drive URL format")
-
-        download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-        r = requests.get(download_url)
-        r.raise_for_status()
-
-        # Write to a temporary file so downstream code can use a file path
-        import tempfile
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".vcf")
-        tmp.write(r.content)
-        tmp.close()
-        return tmp.name
-    except Exception as e:
-        st.error(f"Failed to download from Google Drive: {e}")
-        return None
 
 # Define report groups
 report_groups = {
