@@ -1266,17 +1266,29 @@ def get_genotype(rsid, role):
             "mom": (vcf_m, sample_mom),
             "dad": (vcf_f, sample_dad)
         }[role]
-        try:
-            rec = next(vobj(f"{rsid}"), None)
-            gt = rec.genotype(samp)["GT"]
-            return gt, rec.REF, rec.ALT[0]
-        except:
-            pass
-    d = mock_vcf_data[rsid]
-    if role=="ind":
-        return d["gt"], d["ref"], d["alt"]
-    return (d["mother"], d["ref"], d["alt"]) if role=="mom" else (d["father"], d["ref"], d["alt"])
 
+        try:
+            for rec in vobj:
+                if rec.ID == rsid:
+                    sample_index = vobj.samples.index(samp)
+                    gt_tuple = rec.genotypes[sample_index]  # (allele1, allele2, phased)
+                    gt = [gt_tuple[0], gt_tuple[1]]
+                    return gt, rec
+            return None
+        except Exception:
+            return None
+
+    # Fallback to demo/mock data
+    d = mock_vcf_data.get(rsid)
+    if not d:
+        return None
+    if role == "ind":
+        return d["gt"], None
+    elif role == "mom":
+        return d["mother"], None
+    else:
+        return d["father"], None
+        
 # 5. App UI
 st.title("Genome Scan: Enhanced Trait-Based SNP Explorer")
 page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"])
