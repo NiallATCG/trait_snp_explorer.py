@@ -1561,68 +1561,68 @@ for trait in selected:
 
             # Summary
             for trait in selected:
-    if page == "Individual" and trait == "Height":
-        continue
-
-    info = traits_info[trait]
-    with st.expander(trait, expanded=True):
-        # Gene summary
-        st.subheader("Trait Gene Summary")
-
-        # Show plain-language overview first
-        if "overview" in info:
-            st.subheader("**Overview**")
-            st.write(info["overview"])
-
-        # Gene
-        if info["gene"]:
-            st.write(f"**Gene**: {info['gene']}")
-
-        # Molecular mechanisms
-        if info["description"]:    
-            st.write(f"**Molecular Mechanisms**: {info['description']}")
-
-        # Hair interpretation
-        if trait == "Hair Colour":
-            st.subheader("Trait Interpretation")
-            st.write(info["interpretation"])
-
-        # Genotypes & Inheritance
-        if info["snps"]:
-            st.subheader("Genotypes & Inheritance")
-            individual_present = False
-            child_present_pcts = []
-
-            for snp in info["snps"]:
-                if page == "Individual":
-                    gt, ref, alt = get_genotype(snp, "ind")
-                    b, a = display_genotype(gt, ref, alt)
-                    zg = zygosity(gt)
-                    pres, mode = format_presence(gt, info["inheritance"])
-                    if pres == "Trait present":
-                        individual_present = True
-                    st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
-                    st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
-                else:
-                    m_gt, m_ref, m_alt = get_genotype(snp, "mom")
-                    f_gt, f_ref, f_alt = get_genotype(snp, "dad")
-                    m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
-                    f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
-                    m_zg = zygosity(m_gt); f_zg = zygosity(f_gt)
-                    m_pres, m_mode = format_presence(m_gt, info["inheritance"])
-                    f_pres, f_mode = format_presence(f_gt, info["inheritance"])
-
-                    st.markdown(f"**{snp}** (REF={m_ref}, ALT={m_alt})")
-                    st.write(f"- Mother: {m_b} → {m_a}, {m_zg}, {m_pres} {m_mode}")
-                    st.write(f"- Father: {f_b} → {f_a}, {f_zg}, {f_pres} {f_mode}")
-
-            st.markdown("")
-
-        #  Unified Summary
-        st.subheader("Summary")
-        st.write(info.get("summary", "_No summary available_"))
-
-        st.markdown("---")
+                if page == "Individual" and trait == "Height":
+                    continue
+            
+                info = traits_info[trait]
+                with st.expander(trait, expanded=True):
+                    # Gene summary
+                    st.subheader("Trait Gene Summary")
+            
+                    # Show plain-language overview first
+                    if "overview" in info:
+                        st.subheader("**Overview**")
+                        st.write(info["overview"])
+            
+                    # Gene
+                    if info["gene"]:
+                        st.write(f"**Gene**: {info['gene']}")
+            
+                    # Molecular mechanisms
+                    if info["description"]:    
+                        st.write(f"**Molecular Mechanisms**: {info['description']}")
+            
+                    # Hair interpretation
+                    if trait == "Hair Colour":
+                        st.subheader("Trait Interpretation")
+                        st.write(info["interpretation"])
+            
+                    # Genotypes & Inheritance
+                    if info["snps"]:
+                        st.subheader("Genotypes & Inheritance")
+                        individual_present = False
+                        child_present_pcts = []
+            
+                        for snp in info["snps"]:
+                            if page == "Individual":
+                                gt, ref, alt = get_genotype(snp, "ind")
+                                b, a = display_genotype(gt, ref, alt)
+                                zg = zygosity(gt)
+                                pres, mode = format_presence(gt, info["inheritance"])
+                                if pres == "Trait present":
+                                    individual_present = True
+                                st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
+                                st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
+                            else:
+                                m_gt, m_ref, m_alt = get_genotype(snp, "mom")
+                                f_gt, f_ref, f_alt = get_genotype(snp, "dad")
+                                m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
+                                f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
+                                m_zg = zygosity(m_gt); f_zg = zygosity(f_gt)
+                                m_pres, m_mode = format_presence(m_gt, info["inheritance"])
+                                f_pres, f_mode = format_presence(f_gt, info["inheritance"])
+            
+                                st.markdown(f"**{snp}** (REF={m_ref}, ALT={m_alt})")
+                                st.write(f"- Mother: {m_b} → {m_a}, {m_zg}, {m_pres} {m_mode}")
+                                st.write(f"- Father: {f_b} → {f_a}, {f_zg}, {f_pres} {f_mode}")
+            
+                        st.markdown("")
+            
+                    #  Unified Summary
+                    st.subheader("Summary")
+                    st.write(info.get("summary", "_No summary available_"))
+            
+                    st.markdown("---")
 
 # Cleanup
 if use_real_vcf:
