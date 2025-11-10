@@ -1086,14 +1086,13 @@ page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"]
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
-# ---  Define Google cloud uploaded  ---
 import requests
 import tempfile
 
 def download_from_gdrive(gdrive_url):
     """Download a file from Google Drive using requests, handling large-file confirmation."""
     try:
-        # Extract the file ID from a typical Google Drive share URL
+        # Extract file ID
         if "/d/" in gdrive_url:
             file_id = gdrive_url.split("/d/")[1].split("/")[0]
         elif "id=" in gdrive_url:
@@ -1108,11 +1107,10 @@ def download_from_gdrive(gdrive_url):
         response = session.get(base_url, params={"id": file_id}, stream=True)
         response.raise_for_status()
 
-        # Debug info
         st.write("Download status:", response.status_code)
         st.write("Download URL:", response.url)
 
-        # Check for confirmation token (large file warning)
+        # Detect confirmation token
         token = None
         for key, value in response.cookies.items():
             if key.startswith("download_warning"):
@@ -1122,7 +1120,13 @@ def download_from_gdrive(gdrive_url):
             response = session.get(base_url, params={"id": file_id, "confirm": token}, stream=True)
             response.raise_for_status()
 
-        # Save to temp file
+        # If we still got HTML instead of file, bail out
+        if "text/html" in response.headers.get("Content-Type", ""):
+            st.error("Got HTML page instead of file — check that the Drive file is shared publicly")
+            st.write("Downloaded bytes:", len(response.content))
+            return None
+
+        # Stream to temp file
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".vcf")
         size = 0
         for chunk in response.iter_content(32768):
@@ -1131,15 +1135,12 @@ def download_from_gdrive(gdrive_url):
                 size += len(chunk)
         tmp.close()
 
-        # Debug info
         st.write("Downloaded bytes:", size)
-
         return tmp.name
 
     except Exception as e:
         st.error(f"Failed to download from Google Drive: {e}")
         return None
-
 
 # --- VCF upload ---
 
