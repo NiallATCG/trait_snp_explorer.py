@@ -1119,11 +1119,21 @@ if page == "Individual":
         gdrive_url = st.sidebar.text_input("Paste Google Drive link")
         if gdrive_url:
             vcf_file = download_from_gdrive(gdrive_url)
-            if vcf_file and VCF:
+
+            import os
+            if vcf_file:
+                st.write("VCF file path:", vcf_file)
+                st.write("File exists:", os.path.exists(vcf_file))
+                if os.path.exists(vcf_file):
+                    st.write("File size:", os.path.getsize(vcf_file))
+    
+            # Only try to parse if the file exists and is non‑trivial
+            if vcf_file and os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
                 vcf_ind = VCF(vcf_file)
                 sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples)
                 use_real_vcf = True
                 st.sidebar.success("VCF loaded from Google Drive")
+          
     elif method == "Demo data":
         using_demo_data = True
         vcf_file = "demo_data/demo_individual.vcf"
