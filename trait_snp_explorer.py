@@ -1091,7 +1091,7 @@ import gdown
 
 def download_from_gdrive(gdrive_url):
     """Download a file from Google Drive using requests, handling large-file confirmation."""
-   try:
+    try:
         tmp_path = "temp_download.vcf"
         gdown.download(gdrive_url, tmp_path, quiet=False)
         return tmp_path
