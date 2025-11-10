@@ -1087,25 +1087,7 @@ st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
 # --- VCF upload ---
-
-import io, re, requests
-
-def download_from_gdrive(gdrive_url):
-    """Convert a Google Drive share link to a direct download and return BytesIO."""
-    match = re.search(r"/d/([a-zA-Z0-9_-]+)", gdrive_url)
-    if not match:
-        st.warning("Invalid Google Drive link format. Use the 'share link' from Drive.")
-        return None
-    file_id = match.group(1)
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        st.error("Failed to download file from Google Drive.")
-        return None
-    return io.BytesIO(response.content)
-
-# --- VCF upload ---
-using_demo_data = False   # flag to track demo mode
+using_demo_data = False   # global flag
 
 if page == "Individual":
     st.sidebar.subheader("Upload Individual VCF")
@@ -1121,7 +1103,7 @@ if page == "Individual":
             vcf_file = download_from_gdrive(gdrive_url)
     else:  # Demo data
         using_demo_data = True
-        vcf_file = "demo_data/demo_individual.vcf"  # path to bundled demo file
+        vcf_file = "demo_data/demo_individual.vcf"
 
     if vcf_file and VCF and not using_demo_data:
         vcf_ind = VCF(vcf_file)
@@ -1166,7 +1148,7 @@ else:
         sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
         use_real_vcf = True
 
-# --- Highlight demo mode ---
+# --- Highlight demo mode (works for both Individual and Child Predictor) ---
     if using_demo_data:
         st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
 
