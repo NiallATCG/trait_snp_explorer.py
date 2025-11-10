@@ -1105,20 +1105,25 @@ def download_from_gdrive(gdrive_url):
     return io.BytesIO(response.content)
 
 # --- VCF upload ---
+using_demo_data = False   # flag to track demo mode
+
 if page == "Individual":
     st.sidebar.subheader("Upload Individual VCF")
 
-    method = st.sidebar.radio("Choose upload method:", ["Local file", "Google Drive"])
+    method = st.sidebar.radio("Choose upload method:", ["Local file", "Google Drive", "Demo data"])
 
     vcf_file = None
     if method == "Local file":
         vcf_file = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
-    else:
+    elif method == "Google Drive":
         gdrive_url = st.sidebar.text_input("Paste Google Drive link")
         if gdrive_url:
             vcf_file = download_from_gdrive(gdrive_url)
+    else:  # Demo data
+        using_demo_data = True
+        vcf_file = "demo_data/demo_individual.vcf"  # path to bundled demo file
 
-    if vcf_file and VCF:
+    if vcf_file and VCF and not using_demo_data:
         vcf_ind = VCF(vcf_file)
         sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples)
         use_real_vcf = True
@@ -1127,33 +1132,43 @@ else:
     st.sidebar.subheader("Upload Parental VCFs")
 
     # Mother
-    mom_method = st.sidebar.radio("Mother upload method:", ["Local file", "Google Drive"])
+    mom_method = st.sidebar.radio("Mother upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_mom = None
     if mom_method == "Local file":
         vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
-    else:
+    elif mom_method == "Google Drive":
         gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
         if gdrive_mom:
             vcf_mom = download_from_gdrive(gdrive_mom)
+    else:
+        using_demo_data = True
+        vcf_mom = "demo_data/demo_mother.vcf"
 
     # Father
-    dad_method = st.sidebar.radio("Father upload method:", ["Local file", "Google Drive"])
+    dad_method = st.sidebar.radio("Father upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_dad = None
     if dad_method == "Local file":
         vcf_dad = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"])
-    else:
+    elif dad_method == "Google Drive":
         gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
         if gdrive_dad:
             vcf_dad = download_from_gdrive(gdrive_dad)
+    else:
+        using_demo_data = True
+        vcf_dad = "demo_data/demo_father.vcf"
 
-    if vcf_mom and VCF:
+    if vcf_mom and VCF and not using_demo_data:
         vcf_m = VCF(vcf_mom)
         sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples)
         use_real_vcf = True
-    if vcf_dad and VCF:
+    if vcf_dad and VCF and not using_demo_data:
         vcf_f = VCF(vcf_dad)
         sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
         use_real_vcf = True
+
+# --- Highlight demo mode ---
+    if using_demo_data:
+    st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
 
 # Define report groups
 report_groups = {
