@@ -1127,13 +1127,17 @@ if page == "Individual":
                 if os.path.exists(vcf_file):
                     st.write("File size:", os.path.getsize(vcf_file))
     
-            # Only try to parse if the file exists and is non‑trivial
+        # Only try to parse if the file exists and is non‑trivial + unique key
             if vcf_file and os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
                 vcf_ind = VCF(vcf_file)
-                sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples)
-                use_real_vcf = True
-                st.sidebar.success("VCF loaded from Google Drive")
-          
+                sample_ind = st.sidebar.selectbox(
+                    "Select sample",
+                    vcf_ind.samples,
+                    key="gdrive_sample_select"   # 👈 unique key here
+                )
+    use_real_vcf = True
+    st.sidebar.success("VCF loaded from Google Drive")
+
     elif method == "Demo data":
         using_demo_data = True
         vcf_file = "demo_data/demo_individual.vcf"
@@ -1159,7 +1163,11 @@ else:
             vcf_mom = download_from_gdrive(gdrive_mom)
             if vcf_mom and VCF:
                 vcf_m = VCF(vcf_mom)
-                sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples)
+                sample_mom = st.sidebar.selectbox(
+                    "Mother sample",
+                    vcf_m.samples,
+                    key="mother_sample_gdrive"   # 👈 unique key
+                )
                 use_real_vcf = True
                 st.sidebar.success("Mother VCF loaded from Google Drive")
                 
@@ -1179,7 +1187,11 @@ else:
             vcf_dad = download_from_gdrive(gdrive_dad)
             if vcf_dad and VCF:
                 vcf_f = VCF(vcf_dad)
-                sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
+                sample_dad = st.sidebar.selectbox(
+                    "Father sample",
+                    vcf_f.samples,
+                    key="father_sample_gdrive"   # 👈 unique key
+                )
                 use_real_vcf = True
                 st.sidebar.success("Father VCF loaded from Google Drive")
                 
@@ -1188,13 +1200,22 @@ else:
         vcf_dad = "demo_data/demo_father.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Father")
 
-    if vcf_mom and VCF and not using_demo_data:
+   if vcf_mom and VCF and not using_demo_data:
         vcf_m = VCF(vcf_mom)
-        sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples)
+        sample_mom = st.sidebar.selectbox(
+            "Mother sample",
+            vcf_m.samples,
+            key="mother_sample_final"   # 👈 unique key
+        )
         use_real_vcf = True
+
     if vcf_dad and VCF and not using_demo_data:
         vcf_f = VCF(vcf_dad)
-        sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
+        sample_dad = st.sidebar.selectbox(
+            "Father sample",
+            vcf_f.samples,
+            key="father_sample_final"   # 👈 unique key
+        )
         use_real_vcf = True
 
 # --- Global banner if any demo data is active ---
