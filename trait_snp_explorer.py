@@ -1131,9 +1131,14 @@ if page == "Individual":
     if method == "Local file":
         vcf_file = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
     elif method == "Google Drive":
-        gdrive_url = st.sidebar.text_input("Paste Google Drive link")
-        if gdrive_url:
-            vcf_file = download_from_gdrive(gdrive_url)
+    gdrive_url = st.sidebar.text_input("Paste Google Drive link")
+    if gdrive_url:
+        vcf_file = download_from_gdrive(gdrive_url)
+        if vcf_file and VCF:
+            vcf_ind = VCF(vcf_file)
+            sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples)
+            use_real_vcf = True
+            st.sidebar.success("VCF loaded from Google Drive")
     elif method == "Demo data":
         using_demo_data = True
         vcf_file = "demo_data/demo_individual.vcf"
@@ -1152,10 +1157,15 @@ else:
     vcf_mom = None
     if mom_method == "Local file":
         vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
-    elif mom_method == "Google Drive":
-        gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
-        if gdrive_mom:
-            vcf_mom = download_from_gdrive(gdrive_mom)
+   elif mom_method == "Google Drive":
+    gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
+    if gdrive_mom:
+        vcf_mom = download_from_gdrive(gdrive_mom)
+        if vcf_mom and VCF:
+            vcf_m = VCF(vcf_mom)
+            sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples)
+            use_real_vcf = True
+            st.sidebar.success("Mother VCF loaded from Google Drive")
     elif mom_method == "Demo data":
         using_demo_data = True
         vcf_mom = "demo_data/demo_mother.vcf"
@@ -1165,10 +1175,15 @@ else:
     vcf_dad = None
     if dad_method == "Local file":
         vcf_dad = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"])
-    elif dad_method == "Google Drive":
-        gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
-        if gdrive_dad:
-            vcf_dad = download_from_gdrive(gdrive_dad)
+   elif dad_method == "Google Drive":
+    gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
+    if gdrive_dad:
+        vcf_dad = download_from_gdrive(gdrive_dad)
+        if vcf_dad and VCF:
+            vcf_f = VCF(vcf_dad)
+            sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples)
+            use_real_vcf = True
+            st.sidebar.success("Father VCF loaded from Google Drive")
     elif dad_method == "Demo data":
         using_demo_data = True
         vcf_dad = "demo_data/demo_father.vcf"
