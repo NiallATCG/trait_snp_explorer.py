@@ -646,11 +646,11 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
 
     # Earwax Type (ABCC11 rs17822931)
     elif trait == "Earwax Type":
-        gt = safe_gt(info["snps"][0])
+        gt = safe_gt(info["snps"][0])  # returns list like [a1, a2] or None
         if gt is None:
             return "Unknown"
         return "Dry earwax" if gt == [1, 1] else "Wet earwax"
-
+        
     # Tanning Response (MC1R, IRF4, HERC2/OCA2, SLC45A2, TYR)
     elif trait == "Tanning Response":
         alt_count = safe_alt_count(info["snps"])
