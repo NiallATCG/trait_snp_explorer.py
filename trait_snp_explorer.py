@@ -1158,7 +1158,7 @@ else:
     if mom_method == "Local file":
         vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
         
-   elif mom_method == "Google Drive":
+    elif mom_method == "Google Drive":
         gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
         if gdrive_mom:
             vcf_mom = download_from_gdrive(gdrive_mom)
