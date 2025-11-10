@@ -646,7 +646,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
 
     # Earwax Type (ABCC11 rs17822931)
     elif trait == "Earwax Type":
-        gt = safe_gt(info["snps"][0])  # returns list like [a1, a2] or None
+        gt = safe_gt(info["snps"][0])
         if gt is None:
             return "Unknown"
         return "Dry earwax" if gt == [1, 1] else "Wet earwax"
@@ -729,7 +729,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
             return "Unknown"
         return "Soapy coriander perception" if 1 in gt else "Normal coriander perception"
 
-    # Red-Green Colourblindness (OPN1LW/OPN1MW proxies)
+# Red-Green Colourblindness (OPN1LW/OPN1MW proxies)
     elif trait == "Red-Green Colourblindness":
         gt = safe_gt(info["snps"][0])
         if gt is None:
@@ -845,7 +845,8 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
             return "Unknown"
         return "POLG variant detected — valproate contraindicated" if 1 in gt else "No POLG variant detected"
 
-    # Siponimod contraindication (CYP2C9)
+
+     # Siponimod contraindication (CYP2C9)
     elif trait == "Siponimod contraindication":
         gt = safe_gt(info["snps"][0])
         if gt is None:
@@ -903,7 +904,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
 
     # ---- Infectious Disease ----
 
-    # Abacavir hypersensitivity (HLA-B*57:01)
+       # Abacavir hypersensitivity (HLA-B*57:01)
     elif trait == "Abacavir hypersensitivity":
         gt = safe_gt(info["snps"][0])
         if gt is None:
@@ -967,7 +968,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
         else:
             return "High risk of thiopurine toxicity"
 
-    # Mycophenolate response (research) (IMPDH variants)
+   # Mycophenolate response (research) (IMPDH variants)
     elif trait == "Mycophenolate response (research)":
         gt = safe_gt(info["snps"][0])
         if gt is None:
@@ -992,6 +993,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
         if gt is None:
             return "Unknown"
         return "Poor metaboliser — higher bupropion exposure" if 1 in gt else "Normal bupropion metabolism"
+
 
     # Fallback
     else:
