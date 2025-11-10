@@ -1440,7 +1440,8 @@ if selected:
         # Fallback
         else:
             summary = ""
-
+         # Store the summary centrally
+        traits_info[trait]["summary"] = summary
         rows.append({"Trait": trait, "Summary": summary})
 
     st.table(pd.DataFrame(rows))
@@ -1559,177 +1560,67 @@ for trait in selected:
                 st.markdown("")
 
             # Summary
-            st.subheader("Summary")
+            for trait in selected:
+    if page == "Individual" and trait == "Height":
+        continue
 
-            if trait == "Freckles":
-                if page=="Individual":
-                    total_alt = sum(get_genotype(s,"ind")[0].count(1) for s in info["snps"])
-                    res = (
-                        "No freckles" if total_alt==0
-                        else "Mild freckling" if total_alt<=2
-                        else "Pronounced freckling"
-                    )
-                    st.write(res)
+    info = traits_info[trait]
+    with st.expander(trait, expanded=True):
+        # Gene summary
+        st.subheader("Trait Gene Summary")
+
+        # Show plain-language overview first
+        if "overview" in info:
+            st.subheader("**Overview**")
+            st.write(info["overview"])
+
+        # Gene
+        if info["gene"]:
+            st.write(f"**Gene**: {info['gene']}")
+
+        # Molecular mechanisms
+        if info["description"]:    
+            st.write(f"**Molecular Mechanisms**: {info['description']}")
+
+        # Hair interpretation
+        if trait == "Hair Colour":
+            st.subheader("Trait Interpretation")
+            st.write(info["interpretation"])
+
+        # Genotypes & Inheritance
+        if info["snps"]:
+            st.subheader("Genotypes & Inheritance")
+            individual_present = False
+            child_present_pcts = []
+
+            for snp in info["snps"]:
+                if page == "Individual":
+                    gt, ref, alt = get_genotype(snp, "ind")
+                    b, a = display_genotype(gt, ref, alt)
+                    zg = zygosity(gt)
+                    pres, mode = format_presence(gt, info["inheritance"])
+                    if pres == "Trait present":
+                        individual_present = True
+                    st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
+                    st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
                 else:
-                    m1,_,_ = get_genotype(info["snps"][0],"mom")
-                    f1,_,_ = get_genotype(info["snps"][0],"dad")
-                    p1 = child_genotype_probs(m1,f1)
-                    m2,_,_ = get_genotype(info["snps"][1],"mom")
-                    f2,_,_ = get_genotype(info["snps"][1],"dad")
-                    p2 = child_genotype_probs(m2,f2)
-                    P1_00 = next((x["pct"] for x in p1 if x["geno"]==(0,0)),0)/100
-                    P2_00 = next((x["pct"] for x in p2 if x["geno"]==(0,0)),0)/100
-                    P_no = P1_00*P2_00*100
-                    P1_hom = next((x["pct"] for x in p1 if x["geno"]==(1,1)),0)/100
-                    P2_hom = next((x["pct"] for x in p2 if x["geno"]==(1,1)),0)/100
-                    P_pron = (P1_hom+P2_hom-P1_hom*P2_hom)*100
-                    P_mild = 100-P_no-P_pron
-                    st.write(f"No freckles: {P_no:.1f}%")
-                    st.write(f"Mild freckling: {P_mild:.1f}%")
-                    st.write(f"Pronounced freckling: {P_pron:.1f}%")
+                    m_gt, m_ref, m_alt = get_genotype(snp, "mom")
+                    f_gt, f_ref, f_alt = get_genotype(snp, "dad")
+                    m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
+                    f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
+                    m_zg = zygosity(m_gt); f_zg = zygosity(f_gt)
+                    m_pres, m_mode = format_presence(m_gt, info["inheritance"])
+                    f_pres, f_mode = format_presence(f_gt, info["inheritance"])
 
-            elif trait == "Hair Colour":
-                if page=="Individual":
-                    total_alt = sum(get_genotype(s,"ind")[0].count(1) for s in info["snps"])
-                    hair_sum = (
-                        "Non-red hair" if total_alt==0
-                        else "Auburn hair" if total_alt==1
-                        else "True red hair"
-                    )
-                    st.write(hair_sum)
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    p00 = next((x["pct"] for x in p if x["geno"]==(0,0)),0)
-                    p01 = next((x["pct"] for x in p if x["geno"]==(0,1)),0)
-                    p11 = next((x["pct"] for x in p if x["geno"]==(1,1)),0)
-                    st.write(f"Non-red hair: {p00:.1f}%")
-                    st.write(f"Auburn hair: {p01:.1f}%")
-                    st.write(f"True red hair: {p11:.1f}%")
+                    st.markdown(f"**{snp}** (REF={m_ref}, ALT={m_alt})")
+                    st.write(f"- Mother: {m_b} → {m_a}, {m_zg}, {m_pres} {m_mode}")
+                    st.write(f"- Father: {f_b} → {f_a}, {f_zg}, {f_pres} {f_mode}")
 
-            elif trait == "Red-Green Colourblindness":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    st.write("Red green colour blind" if any(gt) else "Not red green colour blind")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    pres = sum(x["pct"] for x in p if any(x["geno"]))
-                    st.write(f"Red green colour blind: {pres:.1f}%")
-                    st.write(f"Not red green colour blind: {100-pres:.1f}%")
+            st.markdown("")
 
-            elif trait == "Eye Colour":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    st.write("Blue eyes" if gt==[0,0] else "Brown eyes")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    blue = next((x["pct"] for x in p if x["geno"]==(0,0)),0)
-                    st.write(f"Blue eyes: {blue:.1f}%")
-                    st.write(f"Brown eyes: {100-blue:.1f}%")
-
-            elif trait == "Skin Tone":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    tone = (
-                        "Lighter" if gt==[1,1]
-                        else "Intermediate" if gt[0]!=gt[1]
-                        else "Darker"
-                    )
-                    st.write(f"{tone} skin tone")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    light = next((x["pct"] for x in p if x["geno"]==(1,1)),0)
-                    inter = next((x["pct"] for x in p if sorted(x["geno"])==[0,1]),0)
-                    dark = 100 - light - inter
-                    st.write(f"Lighter skin tone: {light:.1f}%")
-                    st.write(f"Intermediate skin tone: {inter:.1f}%")
-                    st.write(f"Darker skin tone: {dark:.1f}%")
-
-            elif trait == "Earwax Type":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    st.write("Dry earwax" if gt.count(1)==2 else "Wet earwax")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    dry = next((x["pct"] for x in p if x["geno"]==(1,1)),0)
-                    st.write(f"Dry earwax: {dry:.1f}%")
-                    st.write(f"Wet earwax: {100-dry:.1f}%")
-
-            elif trait == "Lactose Intolerance":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    st.write("Lactose tolerant" if any(gt) else "Lactose intolerant")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    tol = sum(x["pct"] for x in p if any(x["geno"]))
-                    st.write(f"Lactose tolerant: {tol:.1f}%")
-                    st.write(f"Lactose intolerant: {100-tol:.1f}%")
-
-            elif trait == "PTC Tasting":
-                if page=="Individual":
-                    total_alt = sum(get_genotype(s,"ind")[0].count(1) for s in info["snps"])
-                    st.write("Can taste PTC" if total_alt>0 else "Cannot taste PTC")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    taste = sum(x["pct"] for x in p if any(x["geno"]))
-                    st.write(f"Can taste PTC: {taste:.1f}%")
-                    st.write(f"Cannot taste PTC: {100-taste:.1f}%")
-
-            elif trait == "Coriander Taste":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    st.write("Perceives coriander as soapy" if any(gt) else "Normal taste")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    soapy = sum(x["pct"] for x in p if any(x["geno"]))
-                    st.write(f"Soapy perception: {soapy:.1f}%")
-                    st.write(f"Normal taste: {100-soapy:.1f}%")
-
-            elif trait == "Sprint Gene":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    geno = "".join("R" if a==0 else "X" for a in sorted(gt))
-                    if "R" in geno:
-                        st.write("Sprint gene present: better sprint/power performance")
-                    else:
-                        st.write("Sprint gene absent: reduced sprint performance")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    pres_pct = sum(x["pct"] for x in p if any(a==0 for a in x["geno"]))
-                    st.write(f"Sprint gene present: {pres_pct:.1f}% chance")
-                    st.write(f"Sprint gene absent: {100-pres_pct:.1f}% chance")
-
-            elif trait == "Alcohol Flush":
-                if page=="Individual":
-                    gt,_,_ = get_genotype(info["snps"][0],"ind")
-                    st.write("Alcohol flush present" if any(gt) else "Alcohol flush not present")
-                else:
-                    m_gt,_,_ = get_genotype(info["snps"][0],"mom")
-                    f_gt,_,_ = get_genotype(info["snps"][0],"dad")
-                    p = child_genotype_probs(m_gt,f_gt)
-                    pres_pct = sum(x["pct"] for x in p if any(a==1 for a in x["geno"]))
-                    st.write(f"Alcohol flush present: {pres_pct:.1f}% chance")
-                    st.write(f"Alcohol flush not present: {100-pres_pct:.1f}% chance")
-
-        else:
-            st.write("_No defined SNPs for this trait._")
+        #  Unified Summary
+        st.subheader("Summary")
+        st.write(info.get("summary", "_No summary available_"))
 
         st.markdown("---")
 
