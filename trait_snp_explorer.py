@@ -1086,10 +1086,12 @@ page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"]
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
-# ---  Define Google cloud uplaoded 
+# ---  Define Google cloud uploaded  ---
+import requests
+import tempfile
 
 def download_from_gdrive(gdrive_url):
-    """Download a file from Google Drive given a shareable link."""
+    """Download a file from Google Drive using requests, handling large-file confirmation."""
     try:
         # Extract the file ID from a typical Google Drive share URL
         if "/d/" in gdrive_url:
@@ -1099,19 +1101,41 @@ def download_from_gdrive(gdrive_url):
         else:
             raise ValueError("Invalid Google Drive URL format")
 
-        download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
-        r = requests.get(download_url)
-        st.write("Download status:", r.status_code)
-        st.write("Download URL:", download_url)
-        st.write("Downloaded bytes:", len(r.content))
-        r.raise_for_status()
+        session = requests.Session()
+        base_url = "https://drive.google.com/uc?export=download"
 
-        # Write to a temporary file so downstream code can use a file path
-        import tempfile
+        # First request
+        response = session.get(base_url, params={"id": file_id}, stream=True)
+        response.raise_for_status()
+
+        # Debug info
+        st.write("Download status:", response.status_code)
+        st.write("Download URL:", response.url)
+
+        # Check for confirmation token (large file warning)
+        token = None
+        for key, value in response.cookies.items():
+            if key.startswith("download_warning"):
+                token = value
+
+        if token:
+            response = session.get(base_url, params={"id": file_id, "confirm": token}, stream=True)
+            response.raise_for_status()
+
+        # Save to temp file
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".vcf")
-        tmp.write(r.content)
+        size = 0
+        for chunk in response.iter_content(32768):
+            if chunk:
+                tmp.write(chunk)
+                size += len(chunk)
         tmp.close()
+
+        # Debug info
+        st.write("Downloaded bytes:", size)
+
         return tmp.name
+
     except Exception as e:
         st.error(f"Failed to download from Google Drive: {e}")
         return None
