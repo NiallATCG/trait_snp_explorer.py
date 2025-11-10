@@ -14,7 +14,7 @@ try:
 except ImportError:
     VCF = None
 
-st.set_page_config(page_title="Phenome Query", layout="wide")
+st.set_page_config(page_title="Genome Scan: Enhanced Trait-Based SNP Explorer", layout="wide")
 
 # 1. Trait definitions
 traits_info = {
