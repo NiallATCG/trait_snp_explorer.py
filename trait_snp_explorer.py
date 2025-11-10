@@ -1119,7 +1119,6 @@ if page == "Individual":
         gdrive_url = st.sidebar.text_input("Paste Google Drive link")
         if gdrive_url:
             vcf_file = download_from_gdrive(gdrive_url)
-
             import os
             if vcf_file:
                 st.write("VCF file path:", vcf_file)
@@ -1127,7 +1126,7 @@ if page == "Individual":
                 if os.path.exists(vcf_file):
                     st.write("File size:", os.path.getsize(vcf_file))
     
-        # Only try to parse if the file exists and is non‑trivial + unique key
+            # Only try to parse if the file exists and is non‑trivial + unique key
             if vcf_file and os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
                 vcf_ind = VCF(vcf_file)
                 sample_ind = st.sidebar.selectbox(
@@ -1135,8 +1134,8 @@ if page == "Individual":
                     vcf_ind.samples,
                     key="gdrive_sample_select"   # 👈 unique key here
                 )
-    use_real_vcf = True
-    st.sidebar.success("VCF loaded from Google Drive")
+                use_real_vcf = True
+                st.sidebar.success("VCF loaded from Google Drive")
 
     elif method == "Demo data":
         using_demo_data = True
@@ -1200,7 +1199,7 @@ else:
         vcf_dad = "demo_data/demo_father.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Father")
 
-   if vcf_mom and VCF and not using_demo_data:
+    if vcf_mom and VCF and not using_demo_data:
         vcf_m = VCF(vcf_mom)
         sample_mom = st.sidebar.selectbox(
             "Mother sample",
