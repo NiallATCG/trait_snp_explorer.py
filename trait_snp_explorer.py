@@ -1101,9 +1101,8 @@ def download_from_gdrive(gdrive_url):
 
 # --- VCF upload ---
 
-using_demo_data = False
-
 if page == "Individual":
+    using_demo_data = False   # reset for this branch
     st.sidebar.subheader("Upload Individual VCF")
 
     method = st.sidebar.radio(
@@ -1115,24 +1114,26 @@ if page == "Individual":
     vcf_file = None
     if method == "Local file":
         vcf_file = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
+
     elif method == "Google Drive":
         gdrive_url = st.sidebar.text_input("Paste Google Drive link")
         if gdrive_url:
             vcf_file = download_from_gdrive(gdrive_url)
+
             import os
             if vcf_file:
                 st.write("VCF file path:", vcf_file)
                 st.write("File exists:", os.path.exists(vcf_file))
                 if os.path.exists(vcf_file):
                     st.write("File size:", os.path.getsize(vcf_file))
-    
-            # Only try to parse if the file exists and is non‑trivial + unique key
+
+            # Only parse if file exists and is non-trivial
             if vcf_file and os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
                 vcf_ind = VCF(vcf_file)
                 sample_ind = st.sidebar.selectbox(
                     "Select sample",
                     vcf_ind.samples,
-                    key="gdrive_sample_select"   # 👈 unique key here
+                    key="individual_sample_gdrive"
                 )
                 use_real_vcf = True
                 st.sidebar.success("VCF loaded from Google Drive")
@@ -1140,22 +1141,28 @@ if page == "Individual":
     elif method == "Demo data":
         using_demo_data = True
         vcf_file = "demo_data/demo_individual.vcf"
-        # show the banner right here so it appears immediately
         st.sidebar.warning("⚠️ Showing demo data for Individual mode")
 
+    # Final parse only if not demo
     if vcf_file and VCF and not using_demo_data:
         vcf_ind = VCF(vcf_file)
-        sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples)
+        sample_ind = st.sidebar.selectbox(
+            "Select sample",
+            vcf_ind.samples,
+            key="individual_sample_final"
+        )
         use_real_vcf = True
 
 else:
+    using_demo_data = False   # reset for parental branch
     st.sidebar.subheader("Upload Parental VCFs")
 
+    # Mother
     mom_method = st.sidebar.radio("Mother upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_mom = None
     if mom_method == "Local file":
         vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
-        
+
     elif mom_method == "Google Drive":
         gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
         if gdrive_mom:
@@ -1165,21 +1172,22 @@ else:
                 sample_mom = st.sidebar.selectbox(
                     "Mother sample",
                     vcf_m.samples,
-                    key="mother_sample_gdrive"   # 👈 unique key
+                    key="mother_sample_gdrive"
                 )
                 use_real_vcf = True
                 st.sidebar.success("Mother VCF loaded from Google Drive")
-                
+
     elif mom_method == "Demo data":
         using_demo_data = True
         vcf_mom = "demo_data/demo_mother.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Mother")
 
+    # Father
     dad_method = st.sidebar.radio("Father upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_dad = None
     if dad_method == "Local file":
         vcf_dad = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"])
-        
+
     elif dad_method == "Google Drive":
         gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
         if gdrive_dad:
@@ -1189,22 +1197,23 @@ else:
                 sample_dad = st.sidebar.selectbox(
                     "Father sample",
                     vcf_f.samples,
-                    key="father_sample_gdrive"   # 👈 unique key
+                    key="father_sample_gdrive"
                 )
                 use_real_vcf = True
                 st.sidebar.success("Father VCF loaded from Google Drive")
-                
+
     elif dad_method == "Demo data":
         using_demo_data = True
         vcf_dad = "demo_data/demo_father.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Father")
 
+    # Final parse only if not demo
     if vcf_mom and VCF and not using_demo_data:
         vcf_m = VCF(vcf_mom)
         sample_mom = st.sidebar.selectbox(
             "Mother sample",
             vcf_m.samples,
-            key="mother_sample_final"   # 👈 unique key
+            key="mother_sample_final"
         )
         use_real_vcf = True
 
@@ -1213,11 +1222,11 @@ else:
         sample_dad = st.sidebar.selectbox(
             "Father sample",
             vcf_f.samples,
-            key="father_sample_final"   # 👈 unique key
+            key="father_sample_final"
         )
         use_real_vcf = True
 
-# --- Global banner if any demo data is active ---
+# Global banner if demo mode is active
 if using_demo_data:
     st.warning("⚠️ Demo data is currently being shown. Upload your own VCFs to see personalised results.")
 
