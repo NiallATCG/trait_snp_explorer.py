@@ -1086,16 +1086,66 @@ page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"]
 st.sidebar.subheader("Data Upload")
 st.sidebar.markdown("_Disclaimer: all vcf data is not stored and is deleted after the query is run_")
 
-# VCF upload
-if page=="Individual":
-    vcf_file = st.sidebar.file_uploader("Upload Individual VCF", type=["vcf","vcf.gz"])
+# --- VCF upload ---
+
+import io, re, requests
+
+def download_from_gdrive(gdrive_url):
+    """Convert a Google Drive share link to a direct download and return BytesIO."""
+    match = re.search(r"/d/([a-zA-Z0-9_-]+)", gdrive_url)
+    if not match:
+        st.warning("Invalid Google Drive link format. Use the 'share link' from Drive.")
+        return None
+    file_id = match.group(1)
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+    response = requests.get(url)
+    if response.status_code != 200:
+        st.error("Failed to download file from Google Drive.")
+        return None
+    return io.BytesIO(response.content)
+
+# --- VCF upload ---
+if page == "Individual":
+    st.sidebar.subheader("Upload Individual VCF")
+
+    method = st.sidebar.radio("Choose upload method:", ["Local file", "Google Drive"])
+
+    vcf_file = None
+    if method == "Local file":
+        vcf_file = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
+    else:
+        gdrive_url = st.sidebar.text_input("Paste Google Drive link")
+        if gdrive_url:
+            vcf_file = download_from_gdrive(gdrive_url)
+
     if vcf_file and VCF:
         vcf_ind = VCF(vcf_file)
         sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples)
         use_real_vcf = True
+
 else:
-    vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
-    vcf_dad = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"])
+    st.sidebar.subheader("Upload Parental VCFs")
+
+    # Mother
+    mom_method = st.sidebar.radio("Mother upload method:", ["Local file", "Google Drive"])
+    vcf_mom = None
+    if mom_method == "Local file":
+        vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
+    else:
+        gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
+        if gdrive_mom:
+            vcf_mom = download_from_gdrive(gdrive_mom)
+
+    # Father
+    dad_method = st.sidebar.radio("Father upload method:", ["Local file", "Google Drive"])
+    vcf_dad = None
+    if dad_method == "Local file":
+        vcf_dad = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"])
+    else:
+        gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
+        if gdrive_dad:
+            vcf_dad = download_from_gdrive(gdrive_dad)
+
     if vcf_mom and VCF:
         vcf_m = VCF(vcf_mom)
         sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples)
