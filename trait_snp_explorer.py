@@ -1908,16 +1908,19 @@ for trait in selected:
                     result = get_genotype(snp, "ind")
                     if result is None:
                         gt, ref, alt = None, None, None
+                        b, a = "NA/NA", "Unknown"
+                        zg = "Unknown"
+                        pres, mode = "Unknown", ""
                     else:
                         gt, rec = result
                         ref = rec.REF if rec else None
                         alt = rec.ALT[0] if rec and rec.ALT else None
-            
-                    b, a = display_genotype(gt, ref, alt)
-                    zg = zygosity(gt)
-                    pres, mode = format_presence(gt, info["inheritance"])
-                    if pres == "Trait present":
-                        individual_present = True
+                        b, a = display_genotype(gt, ref, alt)
+                        zg = zygosity(gt)
+                        pres, mode = format_presence(gt, info["inheritance"])
+                        if pres == "Trait present":
+                            individual_present = True
+                
                     st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
                     st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
             
@@ -1926,19 +1929,32 @@ for trait in selected:
                     m_result = get_genotype(snp, "mom")
                     if m_result is None:
                         m_gt, m_ref, m_alt = None, None, None
+                        m_b, m_a = "NA/NA", "Unknown"
+                        m_zg = "Unknown"
+                        m_pres, m_mode = "Unknown", ""
                     else:
                         m_gt, m_rec = m_result
                         m_ref = m_rec.REF if m_rec else None
                         m_alt = m_rec.ALT[0] if m_rec and m_rec.ALT else None
-            
+                        m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
+                        m_zg = zygosity(m_gt)
+                        m_pres, m_mode = format_presence(m_gt, info["inheritance"])
+                    
                     # Father
                     f_result = get_genotype(snp, "dad")
                     if f_result is None:
                         f_gt, f_ref, f_alt = None, None, None
+                        f_b, f_a = "NA/NA", "Unknown"
+                        f_zg = "Unknown"
+                        f_pres, f_mode = "Unknown", ""
                     else:
                         f_gt, f_rec = f_result
                         f_ref = f_rec.REF if f_rec else None
                         f_alt = f_rec.ALT[0] if f_rec and f_rec.ALT else None
+                        f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
+                        f_zg = zygosity(f_gt)
+                        f_pres, f_mode = format_presence(f_gt, info["inheritance"])
+
             
                     m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
                     f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
