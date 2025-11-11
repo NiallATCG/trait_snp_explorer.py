@@ -845,7 +845,6 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
             return "Unknown"
         return "POLG variant detected — valproate contraindicated" if 1 in gt else "No POLG variant detected"
 
-
      # Siponimod contraindication (CYP2C9)
     elif trait == "Siponimod contraindication":
         gt = safe_gt(info["snps"][0])
@@ -993,7 +992,6 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
         if gt is None:
             return "Unknown"
         return "Poor metaboliser — higher bupropion exposure" if 1 in gt else "Normal bupropion metabolism"
-
 
     # Fallback
     else:
@@ -1290,7 +1288,34 @@ def get_genotype(rsid, role):
         return d["mother"], None
     else:
         return d["father"], None
-        
+
+# ── Global helpers for genotype safety ──
+def safe_gt(snp):
+    """
+    Return just the genotype list [a1, a2] for a given SNP and role 'ind'.
+    If the SNP is missing or get_genotype returns None, return None.
+    """
+    result = get_genotype(snp, "ind")
+    if result is None:
+        return None
+    gt, rec = result
+    return gt
+
+def safe_alt_count(snps):
+    """
+    Count total ALT alleles across a list of SNPs safely.
+    Returns 0 if SNPs are missing or genotypes are None.
+    """
+    total = 0
+    for s in snps:
+        result = get_genotype(s, "ind")
+        if result is None:
+            continue
+        gt, rec = result
+        if gt is not None:
+            total += gt.count(1)
+    return total
+
 # 5. App UI
 st.title("Genome Scan: Enhanced Trait-Based SNP Explorer")
 page = st.sidebar.radio("Navigate to:", ["Individual","Child Phenome Predictor"])
