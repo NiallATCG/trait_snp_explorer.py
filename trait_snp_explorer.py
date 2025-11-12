@@ -1879,9 +1879,8 @@ for trait in selected:
 
     info = traits_info[trait]
 
-    if trait in externally_visible_traits:
-        # Render flat, no expander
-        st.subheader(trait)
+    # Every trait gets its own expander
+    with st.expander(trait, expanded=False):
         st.subheader("Trait Gene Summary")
 
         # Show plain-language overview first
@@ -1907,7 +1906,7 @@ for trait in selected:
             st.subheader("Genotypes & Inheritance")
             individual_present = False
             child_present_pcts = []
-        
+
             for snp in info["snps"]:
                 if page == "Individual":
                     result = get_genotype(snp, "ind")
@@ -1920,7 +1919,7 @@ for trait in selected:
                         gt, rec = result
                         ref = rec.REF if rec else None
                         alt = rec.ALT[0] if rec and rec.ALT else None
-        
+
                         if gt is None:
                             b, a = "NA/NA", "No genotype call"
                             zg = "Unknown"
@@ -1931,10 +1930,10 @@ for trait in selected:
                             pres, mode = format_presence(gt, info["inheritance"])
                             if pres == "Trait present":
                                 individual_present = True
-        
+
                     st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
                     st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
-        
+
                 else:
                     # Mother
                     m_result = get_genotype(snp, "mom")
@@ -1955,7 +1954,7 @@ for trait in selected:
                             m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
                             m_zg = zygosity(m_gt)
                             m_pres, m_mode = format_presence(m_gt, info["inheritance"])
-        
+
                     # Father
                     f_result = get_genotype(snp, "dad")
                     if f_result is None:
@@ -1975,103 +1974,10 @@ for trait in selected:
                             f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
                             f_zg = zygosity(f_gt)
                             f_pres, f_mode = format_presence(f_gt, info["inheritance"])
-        
+
                     st.markdown(f"**{snp}** (REF={m_ref}, ALT={m_alt})")
                     st.write(f"- Mother: {m_b} → {m_a}, {m_zg}, {m_pres} {m_mode}")
                     st.write(f"- Father: {f_b} → {f_a}, {f_zg}, {f_pres} {f_mode}")
-
-        else:
-            # Default: render inside expander
-            with st.expander(trait, expanded=False):
-                st.subheader("Trait Gene Summary")
-    
-                if "overview" in info:
-                    st.subheader("Overview")
-                    st.write(info["overview"])
-    
-                if info.get("gene"):
-                    st.write(f"**Gene**: {info['gene']}")
-    
-                if info.get("description"):
-                    st.write(f"**Molecular Mechanisms**: {info['description']}")
-    
-                if trait == "Hair Colour":
-                    st.subheader("Trait Interpretation")
-                    st.write(info["interpretation"])
-          
-                # Genotypes & Inheritance
-                if info["snps"]:
-                    st.subheader("Genotypes & Inheritance")
-                    individual_present = False
-                    child_present_pcts = []
-                
-                    for snp in info["snps"]:
-                        if page == "Individual":
-                            result = get_genotype(snp, "ind")
-                            if result is None:
-                                gt, ref, alt = None, None, None
-                                b, a = "NA/NA", "Not found in VCF"
-                                zg = "Unknown"
-                                pres, mode = "Unknown", ""
-                            else:
-                                gt, rec = result
-                                ref = rec.REF if rec else None
-                                alt = rec.ALT[0] if rec and rec.ALT else None
-                
-                                if gt is None:
-                                    b, a = "NA/NA", "No genotype call"
-                                    zg = "Unknown"
-                                    pres, mode = "Unknown", ""
-                                else:
-                                    b, a = display_genotype(gt, ref, alt)
-                                    zg = zygosity(gt)
-                                    pres, mode = format_presence(gt, info["inheritance"])
-                                    if pres == "Trait present":
-                                        individual_present = True
-                
-                            st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
-                            st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
-                
-                        else:
-                            # Mother
-                            m_result = get_genotype(snp, "mom")
-                            if m_result is None:
-                                m_gt, m_ref, m_alt = None, None, None
-                                m_b, m_a = "NA/NA", "Not found in VCF"
-                                m_zg = "Unknown"
-                                m_pres, m_mode = "Unknown", ""
-                            else:
-                                m_gt, m_rec = m_result
-                                m_ref = m_rec.REF if m_rec else None
-                                m_alt = m_rec.ALT[0] if m_rec and m_rec.ALT else None
-                                if m_gt is None:
-                                    m_b, m_a = "NA/NA", "No genotype call"
-                                    m_zg = "Unknown"
-                                    m_pres, m_mode = "Unknown", ""
-                                else:
-                                    m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
-                                    m_zg = zygosity(m_gt)
-                                    m_pres, m_mode = format_presence(m_gt, info["inheritance"])
-                
-                            # Father
-                            f_result = get_genotype(snp, "dad")
-                            if f_result is None:
-                                f_gt, f_ref, f_alt = None, None, None
-                                f_b, f_a = "NA/NA", "Not found in VCF"
-                                f_zg = "Unknown"
-                                f_pres, f_mode = "Unknown", ""
-                            else:
-                                f_gt, f_rec = f_result
-                                f_ref = f_rec.REF if f_rec else None
-                                f_alt = f_rec.ALT[0] if f_rec and f_rec.ALT else None
-                                if f_gt is None:
-                                    f_b, f_a = "NA/NA", "No genotype call"
-                                    f_zg = "Unknown"
-                                    f_pres, f_mode = "Unknown", ""
-                                else:
-                                    f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
-                                    f_zg = zygosity(f_gt)
-                                    f_pres, f_mode = format_presence(f_gt, info["inheritance"])
 
             st.markdown("")
                   
