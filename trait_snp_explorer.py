@@ -1875,8 +1875,10 @@ for trait in selected:
         continue
 
     info = traits_info[trait]
-    with st.expander(trait, expanded=True):
-        # Gene summary
+
+    if group_name == "Externally Visible Characteristics":
+        # Render flat, no expander
+        st.subheader(trait)
         st.subheader("Trait Gene Summary")
 
         # Show plain-language overview first
@@ -1984,8 +1986,10 @@ for trait in selected:
                     continue
             
                 info = traits_info[trait]
-                with st.expander(trait, expanded=True):
-                    # Gene summary
+
+                if group_name == "Externally Visible Characteristics":
+                    # Render flat, no expander
+                    st.subheader(trait)
                     st.subheader("Trait Gene Summary")
             
                     # Show plain-language overview first
