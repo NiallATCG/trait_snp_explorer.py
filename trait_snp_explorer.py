@@ -1883,26 +1883,21 @@ for trait in selected:
     with st.expander(trait, expanded=False):
         st.subheader("Trait Gene Summary")
 
-        # Show plain-language overview first
         if "overview" in info:
             st.subheader("Overview")
             st.write(info["overview"])
 
-        # Gene
         if info.get("gene"):
             st.write(f"**Gene**: {info['gene']}")
 
-        # Molecular mechanisms
         if info.get("description"):
             st.write(f"**Molecular Mechanisms**: {info['description']}")
 
-        # Hair interpretation
         if trait == "Hair Colour":
             st.subheader("Trait Interpretation")
             st.write(info["interpretation"])
 
-        # Genotypes & Inheritance
-        if info["snps"]:
+        if info.get("snps"):
             st.subheader("Genotypes & Inheritance")
             individual_present = False
             child_present_pcts = []
