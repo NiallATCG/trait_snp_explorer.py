@@ -1982,7 +1982,7 @@ for trait in selected:
 
         else:
             # Default: render inside expander
-            with st.expander(trait, expanded=True):
+            with st.expander(trait, expanded=False):
                 st.subheader("Trait Gene Summary")
     
                 if "overview" in info:
