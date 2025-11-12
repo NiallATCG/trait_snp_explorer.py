@@ -1982,23 +1982,22 @@ for trait in selected:
                     continue
             
                 info = traits_info[trait]
-
-                if group_name == "Externally Visible Characteristics":
-                    # Render flat, no expander
-                    st.subheader(trait)
+            
+                # Every trait gets its own expander
+                with st.expander(trait, expanded=False):
                     st.subheader("Trait Gene Summary")
             
                     # Show plain-language overview first
                     if "overview" in info:
-                        st.subheader("**Overview**")
+                        st.subheader("Overview")
                         st.write(info["overview"])
             
                     # Gene
-                    if info["gene"]:
+                    if info.get("gene"):
                         st.write(f"**Gene**: {info['gene']}")
             
                     # Molecular mechanisms
-                    if info["description"]:    
+                    if info.get("description"):
                         st.write(f"**Molecular Mechanisms**: {info['description']}")
             
                     # Hair interpretation
@@ -2007,12 +2006,11 @@ for trait in selected:
                         st.write(info["interpretation"])
             
                     # Genotypes & Inheritance
-                    # ── Genotypes & Inheritance ──
-                    if info["snps"]:
+                    if info.get("snps"):
                         st.subheader("Genotypes & Inheritance")
                         individual_present = False
                         child_present_pcts = []
-                    
+            
                         for snp in info["snps"]:
                             if page == "Individual":
                                 result = get_genotype(snp, "ind")
@@ -2030,10 +2028,10 @@ for trait in selected:
                                     pres, mode = format_presence(gt, info["inheritance"])
                                     if pres == "Trait present":
                                         individual_present = True
-                    
+            
                                 st.markdown(f"**{snp}** (REF={ref}, ALT={alt})")
                                 st.write(f"- Genotype: {b} → {a}, {zg}, {pres} {mode}")
-                    
+            
                             else:
                                 # Mother
                                 m_result = get_genotype(snp, "mom")
@@ -2049,7 +2047,7 @@ for trait in selected:
                                     m_b, m_a = display_genotype(m_gt, m_ref, m_alt)
                                     m_zg = zygosity(m_gt)
                                     m_pres, m_mode = format_presence(m_gt, info["inheritance"])
-                    
+            
                                 # Father
                                 f_result = get_genotype(snp, "dad")
                                 if f_result is None:
@@ -2064,18 +2062,12 @@ for trait in selected:
                                     f_b, f_a = display_genotype(f_gt, f_ref, f_alt)
                                     f_zg = zygosity(f_gt)
                                     f_pres, f_mode = format_presence(f_gt, info["inheritance"])
-                    
+            
                                 st.markdown(f"**{snp}** (REF={m_ref}, ALT={m_alt})")
                                 st.write(f"- Mother: {m_b} → {m_a}, {m_zg}, {m_pres} {m_mode}")
                                 st.write(f"- Father: {f_b} → {f_a}, {f_zg}, {f_pres} {f_mode}")
-                    
+            
                         st.markdown("")
-            
-                    #  Unified Summary
-                    st.subheader("Summary")
-                    st.write(info.get("summary", "_No summary available_"))
-            
-                    st.markdown("---")
 
 # Cleanup
 if use_real_vcf:
