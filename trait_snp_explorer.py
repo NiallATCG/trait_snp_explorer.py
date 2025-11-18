@@ -9,6 +9,12 @@ import requests
 use_real_vcf = False
 vcf_ind = vcf_m = vcf_f = None
 sample_ind = sample_mom = sample_dad = None
+
+# NEW: per-VCF ID indices
+records_by_id_ind = None
+records_by_id_m = None
+records_by_id_f = None
+
 try:
     from cyvcf2 import VCF
 except ImportError:
