@@ -9,12 +9,6 @@ import requests
 use_real_vcf = False
 vcf_ind = vcf_m = vcf_f = None
 sample_ind = sample_mom = sample_dad = None
-
-# NEW: per-VCF ID indices
-records_by_id_ind = None
-records_by_id_m = None
-records_by_id_f = None
-
 try:
     from cyvcf2 import VCF
 except ImportError:
@@ -585,7 +579,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
     - sample: sample name string selected from the VCF
     """
 
-    # Helper: count total ALT alleles across all SNPs safely
+        # Helper: count total ALT alleles across all SNPs safely
     def safe_alt_count(snps):
         total = 0
         for s in snps:
@@ -1265,6 +1259,25 @@ def cm_to_ftin(cm):
     inch = int(round(inches%12))
     return ft, inch
 
+def get_genotype(rsid, role):
+    if use_real_vcf and VCF:
+        vobj, samp = {
+            "ind": (vcf_ind, sample_ind),
+            "mom": (vcf_m, sample_mom),
+            "dad": (vcf_f, sample_dad)
+        }[role]
+
+        try:
+            for rec in vobj:
+                if rec.ID == rsid:
+                    sample_index = vobj.samples.index(samp)
+                    gt_tuple = rec.genotypes[sample_index]  # (allele1, allele2, phased)
+                    gt = [gt_tuple[0], gt_tuple[1]]
+                    return gt, rec
+            return None
+        except Exception:
+            return None
+
     # Fallback to demo/mock data
     d = mock_vcf_data.get(rsid)
     if not d:
@@ -1322,62 +1335,10 @@ def download_from_gdrive(gdrive_url):
         st.error(f"Failed to download from Google Drive: {e}")
         return None
 
-# Build id index when VCFs are loaded
-def build_id_index(vcf_obj):
-    idx = {}
-    for rec in vcf_obj:
-        if rec.ID and rec.ID != ".":
-            idx[rec.ID] = rec
-    return idx
-
-# Store indices per VCF
-records_by_id_ind = None
-records_by_id_m = None
-records_by_id_f = None
-
-def get_genotype(rsid, role):
-    # Real VCF path
-    if VCF:
-        if role == "ind" and vcf_ind and sample_ind and records_by_id_ind:
-            rec = records_by_id_ind.get(rsid)
-            if rec is None:
-                return None
-            sample_index = vcf_ind.samples.index(sample_ind)
-            gt_tuple = rec.genotypes[sample_index]  # (a1, a2, phased)
-            return [gt_tuple[0], gt_tuple[1]], rec
-
-        if role == "mom" and vcf_m and sample_mom and records_by_id_m:
-            rec = records_by_id_m.get(rsid)
-            if rec is None:
-                return None
-            sample_index = vcf_m.samples.index(sample_mom)
-            gt_tuple = rec.genotypes[sample_index]
-            return [gt_tuple[0], gt_tuple[1]], rec
-
-        if role == "dad" and vcf_f and sample_dad and records_by_id_f:
-            rec = records_by_id_f.get(rsid)
-            if rec is None:
-                return None
-            sample_index = vcf_f.samples.index(sample_dad)
-            gt_tuple = rec.genotypes[sample_index]
-            return [gt_tuple[0], gt_tuple[1]], rec
-
-    # Demo/mock data fallback
-    d = mock_vcf_data.get(rsid)
-    if not d:
-        return None
-    if role == "ind":
-        return d["gt"], None
-    elif role == "mom":
-        return d["mother"], None
-    elif role == "dad":
-        return d["father"], None
-    return None
-
 # --- VCF upload ---
 
 if page == "Individual":
-    using_demo_data = False
+    using_demo_data = False   # reset for this branch
     st.sidebar.subheader("Upload Individual VCF")
 
     method = st.sidebar.radio(
@@ -1387,81 +1348,47 @@ if page == "Individual":
     )
 
     vcf_file = None
-
     if method == "Local file":
-        uploaded = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
-        if uploaded:
-            import tempfile
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".vcf") as tmp:
-                tmp.write(uploaded.read())
-                vcf_path = tmp.name
-            if VCF is None:
-                st.sidebar.error("cyvcf2 is not installed. pip install cyvcf2")
-            else:
-                vcf_ind = VCF(vcf_path)
-                records_by_id_ind = build_id_index(vcf_ind)
-                sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples, key="individual_sample_local")
-                use_real_vcf = True
-                st.sidebar.success("VCF loaded")
+        vcf_file = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
 
     elif method == "Google Drive":
-        # Optional import guard for gdown
-        try:
-            import gdown
-        except Exception:
-            gdown = None
-            st.sidebar.error("gdown not installed. pip install gdown to use Google Drive")
         gdrive_url = st.sidebar.text_input("Paste Google Drive link")
-        if gdrive_url and gdown:
+        if gdrive_url:
             vcf_file = download_from_gdrive(gdrive_url)
-            if vcf_file and VCF:
-                import os
+
+            import os
+            if vcf_file:
                 st.write("VCF file path:", vcf_file)
                 st.write("File exists:", os.path.exists(vcf_file))
                 if os.path.exists(vcf_file):
                     st.write("File size:", os.path.getsize(vcf_file))
-                if os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
-                    vcf_ind = VCF(vcf_file)
-                    records_by_id_ind = build_id_index(vcf_ind)
-                    sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples, key="individual_sample_gdrive")
-                    use_real_vcf = True
-                    st.sidebar.success("VCF loaded from Google Drive")
-                else:
-                    st.sidebar.error("Downloaded file is missing or too small to be a valid VCF.")
+
+            # Only parse if file exists and is non-trivial
+            if vcf_file and os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
+                vcf_ind = VCF(vcf_file)
+                sample_ind = st.sidebar.selectbox(
+                    "Select sample",
+                    vcf_ind.samples,
+                    key="individual_sample_gdrive"
+                )
+                use_real_vcf = True
+                st.sidebar.success("VCF loaded from Google Drive")
 
     elif method == "Demo data":
         using_demo_data = True
+        vcf_file = "demo_data/demo_individual.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Individual mode")
 
-    # Display trait summaries
-    if use_real_vcf and vcf_ind and sample_ind and not using_demo_data:
-        st.subheader("Trait summaries from uploaded VCF")
-        for trait, info in traits_info.items():
-            summary = get_trait_summary(trait, info, vcf_ind, sample_ind)
-            st.write(f"{trait}: {summary}")
-    elif using_demo_data:
-        st.subheader("Trait summaries (DEMO DATA)")
-        for trait, info in traits_info.items():
-            summary = get_trait_summary(trait, info)  # demo path
-           
-            st.write(f"{trait}: {summary}")
+    # Final parse only if not demo
+    if vcf_file and VCF and not using_demo_data:
+        vcf_ind = VCF(vcf_file)
+        sample_ind = st.sidebar.selectbox(
+            "Select sample",
+            vcf_ind.samples,
+            key="individual_sample_final"
+        )
+        use_real_vcf = True
 
-# Individual - Local file branch
-if method == "Local file":
-    uploaded = st.sidebar.file_uploader("Upload VCF", type=["vcf","vcf.gz"])
-    if uploaded:
-        import tempfile
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".vcf") as tmp:
-            tmp.write(uploaded.read())
-            vcf_path = tmp.name
-        if VCF is None:
-            st.sidebar.error("cyvcf2 is not installed. pip install cyvcf2")
-        else:
-            vcf_ind = VCF(vcf_path)
-            records_by_id_ind = build_id_index(vcf_ind)
-            sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples, key="individual_sample_local")
-            st.sidebar.success("VCF loaded")
-    
 #  Debug loop for checking if demo or real data
     if vcf_ind and sample_ind and not using_demo_data:
         st.subheader("Trait summaries from uploaded VCF")
@@ -1475,95 +1402,78 @@ if method == "Local file":
             st.write(f"{trait}: {summary}")
 
 else:
-    using_demo_data = False
+    using_demo_data = False   # reset for parental branch
     st.sidebar.subheader("Upload Parental VCFs")
 
     # Mother
     mom_method = st.sidebar.radio("Mother upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_mom = None
     if mom_method == "Local file":
-        mom_uploaded = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"], key="mom_upl")
-        if mom_uploaded and VCF:
-            import tempfile
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".vcf") as tmp:
-                tmp.write(mom_uploaded.read())
-                vcf_mom = tmp.name
-            vcf_m = VCF(vcf_mom)
-            records_by_id_m = build_id_index(vcf_m)
-            sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples, key="mother_sample_local")
-            use_real_vcf = True
-            st.sidebar.success("Mother VCF loaded")
+        vcf_mom = st.sidebar.file_uploader("Upload Mother VCF", type=["vcf","vcf.gz"])
 
     elif mom_method == "Google Drive":
-        try:
-            import gdown
-        except Exception:
-            gdown = None
-            st.sidebar.error("gdown not installed. pip install gdown to use Google Drive")
         gdrive_mom = st.sidebar.text_input("Paste Mother Google Drive link")
-        if gdrive_mom and gdown:
+        if gdrive_mom:
             vcf_mom = download_from_gdrive(gdrive_mom)
             if vcf_mom and VCF:
                 vcf_m = VCF(vcf_mom)
-                records_by_id_m = build_id_index(vcf_m)
-                sample_mom = st.sidebar.selectbox("Mother sample", vcf_m.samples, key="mother_sample_gdrive")
+                sample_mom = st.sidebar.selectbox(
+                    "Mother sample",
+                    vcf_m.samples,
+                    key="mother_sample_gdrive"
+                )
                 use_real_vcf = True
                 st.sidebar.success("Mother VCF loaded from Google Drive")
 
     elif mom_method == "Demo data":
         using_demo_data = True
+        vcf_mom = "demo_data/demo_mother.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Mother")
 
     # Father
     dad_method = st.sidebar.radio("Father upload method:", ["Local file", "Google Drive", "Demo data"])
     vcf_dad = None
     if dad_method == "Local file":
-        dad_uploaded = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"], key="dad_upl")
-        if dad_uploaded and VCF:
-            import tempfile
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".vcf") as tmp:
-                tmp.write(dad_uploaded.read())
-                vcf_dad = tmp.name
-            vcf_f = VCF(vcf_dad)
-            records_by_id_f = build_id_index(vcf_f)
-            sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples, key="father_sample_local")
-            use_real_vcf = True
-            st.sidebar.success("Father VCF loaded")
+        vcf_dad = st.sidebar.file_uploader("Upload Father VCF", type=["vcf","vcf.gz"])
 
     elif dad_method == "Google Drive":
-        try:
-            import gdown
-        except Exception:
-            gdown = None
-            st.sidebar.error("gdown not installed. pip install gdown to use Google Drive")
         gdrive_dad = st.sidebar.text_input("Paste Father Google Drive link")
-        if gdrive_dad and gdown:
+        if gdrive_dad:
             vcf_dad = download_from_gdrive(gdrive_dad)
             if vcf_dad and VCF:
                 vcf_f = VCF(vcf_dad)
-                records_by_id_f = build_id_index(vcf_f)
-                sample_dad = st.sidebar.selectbox("Father sample", vcf_f.samples, key="father_sample_gdrive")
+                sample_dad = st.sidebar.selectbox(
+                    "Father sample",
+                    vcf_f.samples,
+                    key="father_sample_gdrive"
+                )
                 use_real_vcf = True
                 st.sidebar.success("Father VCF loaded from Google Drive")
 
     elif dad_method == "Demo data":
         using_demo_data = True
+        vcf_dad = "demo_data/demo_father.vcf"
         st.sidebar.warning("⚠️ Showing demo data for Father")
 
-    # Show parent summaries (only if real VCF loaded)
-    if vcf_m and sample_mom and not using_demo_data:
-        st.subheader("Mother trait summaries from uploaded VCF")
-        for trait, info in traits_info.items():
-            summary = get_trait_summary(trait, info, vcf_m, sample_mom)
-            st.write(f"{trait}: {summary}")
+    # Final parse only if not demo
+    if vcf_mom and VCF and not using_demo_data:
+        vcf_m = VCF(vcf_mom)
+        sample_mom = st.sidebar.selectbox(
+            "Mother sample",
+            vcf_m.samples,
+            key="mother_sample_final"
+        )
+        use_real_vcf = True
 
-    if vcf_f and sample_dad and not using_demo_data:
-        st.subheader("Father trait summaries from uploaded VCF")
-        for trait, info in traits_info.items():
-            summary = get_trait_summary(trait, info, vcf_f, sample_dad)
-            
-            st.write(f"{trait}: {summary}")
-    
+    if vcf_dad and VCF and not using_demo_data:
+        vcf_f = VCF(vcf_dad)
+        sample_dad = st.sidebar.selectbox(
+            "Father sample",
+            vcf_f.samples,
+            key="father_sample_final"
+        )
+        use_real_vcf = True
+
 # ✅ Debug loops go here
     if vcf_m and sample_mom and not using_demo_data:
         st.subheader("Mother trait summaries from uploaded VCF")
@@ -1576,6 +1486,7 @@ else:
         for trait, info in traits_info.items():
             summary = get_trait_summary(trait, info, vcf_f, sample_dad)
             st.write(f"{trait}: {summary}")
+
 
 # Global banner if demo mode is active
 if using_demo_data:
@@ -1959,7 +1870,7 @@ if page=="Child Phenome Predictor" and "Height" in selected:
     st.markdown("---")
 
 # Define which traits should render flat
-externally_visible_traits = ["Hair Colour", "Eye Colour", "Skin Tone", "Height"]
+externally_visible_traits = ["Hair Colour", "Eye Colour", "Skin Pigmentation", "Height"]  # add/remove as needed
 
 # Loop traits
 for trait in selected:
@@ -2065,3 +1976,6 @@ for trait in selected:
 
             st.markdown("")
 
+# Cleanup
+if use_real_vcf:
+    del vcf_ind, vcf_m, vcf_f
