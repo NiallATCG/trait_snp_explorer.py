@@ -579,7 +579,7 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
     - sample: sample name string selected from the VCF
     """
 
-        # Helper: count total ALT alleles across all SNPs safely
+    # Helper: count total ALT alleles across all SNPs safely
     def safe_alt_count(snps):
         total = 0
         for s in snps:
