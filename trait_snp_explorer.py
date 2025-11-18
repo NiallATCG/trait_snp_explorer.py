@@ -1267,16 +1267,30 @@ def get_genotype(rsid, role):
             "dad": (vcf_f, sample_dad)
         }[role]
 
-        try:
-            for rec in vobj:
-                if rec.ID == rsid:
-                    sample_index = vobj.samples.index(samp)
-                    gt_tuple = rec.genotypes[sample_index]  # (allele1, allele2, phased)
-                    gt = [gt_tuple[0], gt_tuple[1]]
-                    return gt, rec
+        if vobj is None or samp is None:
             return None
-        except Exception:
-            return None
+
+        rec = cache.get(rsid)
+        if rec is None:
+            return None  # SNP not found
+
+        sample_index = vobj.samples.index(samp)
+        gt_tuple = rec.genotypes[sample_index]  # (allele1, allele2, phased)
+        gt = [gt_tuple[0], gt_tuple[1]]
+        return gt, rec
+
+    # fallback to demo/mock data
+    d = mock_vcf_data.get(rsid)
+    if not d:
+        return None
+    if role == "ind":
+        return d["gt"], None
+    elif role == "mom":
+        return d["mother"], None
+    else:
+        return d["father"], None
+
+
 
     # Fallback to demo/mock data
     d = mock_vcf_data.get(rsid)
@@ -1364,15 +1378,16 @@ if page == "Individual":
                     st.write("File size:", os.path.getsize(vcf_file))
 
             # Only parse if file exists and is non-trivial
-            if vcf_file and os.path.exists(vcf_file) and os.path.getsize(vcf_file) > 1000:
-                vcf_ind = VCF(vcf_file)
-                sample_ind = st.sidebar.selectbox(
-                    "Select sample",
-                    vcf_ind.samples,
-                    key="individual_sample_gdrive"
-                )
-                use_real_vcf = True
-                st.sidebar.success("VCF loaded from Google Drive")
+            if vcf_file and os.path.exists(vcf_file):
+                if VCF is None:
+                    st.sidebar.error("cyvcf2 is not installed. Install it to parse real VCFs: pip install cyvcf2")
+                else:
+                    vcf_ind = VCF(vcf_file)
+                    records_by_id_ind = build_id_index(vcf_ind)
+                    sample_ind = st.sidebar.selectbox("Select sample", vcf_ind.samples, key="individual_sample_gdrive")
+                    use_real_vcf = True
+                    st.sidebar.success("VCF loaded from Google Drive")
+
 
     elif method == "Demo data":
         using_demo_data = True
@@ -1474,6 +1489,14 @@ else:
         )
         use_real_vcf = True
 
+# --- Helper: build a lookup dictionary for rsIDs ---
+def build_id_index(vcf_obj):
+    idx = {}
+    for rec in vcf_obj:
+        if rec.ID and rec.ID != ".":
+            idx[rec.ID] = rec
+    return idx
+    
 # ✅ Debug loops go here
     if vcf_m and sample_mom and not using_demo_data:
         st.subheader("Mother trait summaries from uploaded VCF")
@@ -1487,6 +1510,13 @@ else:
             summary = get_trait_summary(trait, info, vcf_f, sample_dad)
             st.write(f"{trait}: {summary}")
 
+# --- Helper: build a lookup dictionary for rsIDs ---
+def build_id_index(vcf_obj):
+    idx = {}
+    for rec in vcf_obj:
+        if rec.ID and rec.ID != ".":
+            idx[rec.ID] = rec
+    return idx
 
 # Global banner if demo mode is active
 if using_demo_data:
