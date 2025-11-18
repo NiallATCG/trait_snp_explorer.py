@@ -1349,6 +1349,14 @@ def download_from_gdrive(gdrive_url):
         st.error(f"Failed to download from Google Drive: {e}")
         return None
 
+# Helper: build a lookup dictionary for rsIDs ---
+def build_id_index(vcf_obj):
+    idx = {}
+    for rec in vcf_obj:
+        if rec.ID and rec.ID != ".":
+            idx[rec.ID] = rec
+    return idx
+
 # --- VCF upload ---
 
 if page == "Individual":
@@ -1488,14 +1496,6 @@ else:
             key="father_sample_final"
         )
         use_real_vcf = True
-
-# --- Helper: build a lookup dictionary for rsIDs ---
-def build_id_index(vcf_obj):
-    idx = {}
-    for rec in vcf_obj:
-        if rec.ID and rec.ID != ".":
-            idx[rec.ID] = rec
-    return idx
     
 # ✅ Debug loops go here
     if vcf_m and sample_mom and not using_demo_data:
@@ -1509,14 +1509,6 @@ def build_id_index(vcf_obj):
         for trait, info in traits_info.items():
             summary = get_trait_summary(trait, info, vcf_f, sample_dad)
             st.write(f"{trait}: {summary}")
-
-# --- Helper: build a lookup dictionary for rsIDs ---
-def build_id_index(vcf_obj):
-    idx = {}
-    for rec in vcf_obj:
-        if rec.ID and rec.ID != ".":
-            idx[rec.ID] = rec
-    return idx
 
 # Global banner if demo mode is active
 if using_demo_data:
