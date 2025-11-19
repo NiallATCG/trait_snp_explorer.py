@@ -1,3 +1,24 @@
+# Debug wrapper: install an excepthook that prints full traceback into Streamlit UI
+# Place these lines at the VERY TOP of trait_snp_explorer.py (before any other imports)
+import sys, traceback
+
+def _streamlit_exception_hook(exc_type, exc_value, exc_tb):
+    # Attempt to show the traceback inside the Streamlit app so we can copy it
+    try:
+        import streamlit as _st
+        _st.error("Unhandled exception occurred — full Python traceback is shown below.")
+        _st.text("".join(traceback.format_exception(exc_type, exc_value, exc_tb)))
+    except Exception:
+        # If Streamlit isn't available yet (or UI not ready), fall back to stderr
+        pass
+    # Always call the original hook so the error is logged normally as well
+    try:
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
+    except Exception:
+        pass
+
+sys.excepthook = _streamlit_exception_hook
+
 import streamlit as st
 from collections import Counter
 import numpy as np
