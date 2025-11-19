@@ -1283,12 +1283,16 @@ def get_genotype(rsid, role):
     d = mock_vcf_data.get(rsid)
     if not d:
         return None
+
+    # Create a small record-like object so callers can access .REF and .ALT like a cyvcf2 record
+    rec_obj = SimpleNamespace(REF=d.get("ref"), ALT=[d.get("alt")] if d.get("alt") is not None else [])
+
     if role == "ind":
-        return d["gt"], None
+        return d["gt"], rec_obj
     elif role == "mom":
-        return d["mother"], None
+        return d["mother"], rec_obj
     else:
-        return d["father"], None
+        return d["father"], rec_obj
 
 # ── Global helpers for genotype safety ──
 def safe_gt(snp):
