@@ -1269,12 +1269,49 @@ def get_genotype(rsid, role):
         }[role]
 
         try:
-            for rec in vobj:
-                if rec.ID == rsid:
-                    sample_index = vobj.samples.index(samp)
-                    gt_tuple = rec.genotypes[sample_index]  # (allele1, allele2, phased)
-                    gt = [gt_tuple[0], gt_tuple[1]]
-                    return gt, rec
+            # Build a lookup index on first use so we don't repeatedly iterate the VCF (which exhausts it).
+            # The index maps rsID strings (from rec.ID or from INFO fields) -> cyvcf2 record.
+            if not hasattr(vobj, "rsid_index"):
+                idx = {}
+                try:
+                    for rec in vobj:
+                        # map the canonical ID if present
+                        if rec.ID and rec.ID != ".":
+                            idx[str(rec.ID)] = rec
+
+                        # also scan INFO for any strings that look like rsIDs and map them
+                        try:
+                            info = rec.INFO
+                            if isinstance(info, dict):
+                                for val in info.values():
+                                    # values can be scalar or list; handle both
+                                    if isinstance(val, (list, tuple)):
+                                        for v in val:
+                                            if isinstance(v, str) and v.startswith("rs"):
+                                                idx[v] = rec
+                                    elif isinstance(val, str) and val.startswith("rs"):
+                                        idx[val] = rec
+                        except Exception:
+                            # non-fatal: best-effort mapping from INFO
+                            pass
+                except Exception:
+                    # If building the full index fails (e.g. very large or unreadable VCF), fall back to empty index
+                    vobj.rsid_index = {}
+                else:
+                    vobj.rsid_index = idx
+
+            # Lookup by rsid using the pre-built index
+            rec = vobj.rsid_index.get(rsid)
+            if rec:
+                sample_index = vobj.samples.index(samp)
+                gt_tuple = rec.genotypes[sample_index]  # (allele1, allele2, phased)
+                # normalize -1 (missing) to None for downstream checks
+                a1 = None if gt_tuple[0] is None or gt_tuple[0] == -1 else gt_tuple[0]
+                a2 = None if gt_tuple[1] is None or gt_tuple[1] == -1 else gt_tuple[1]
+                gt = [a1, a2]
+                return gt, rec
+
+            # Not found in index
             return None
         except Exception:
             return None
