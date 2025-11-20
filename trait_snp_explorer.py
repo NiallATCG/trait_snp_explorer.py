@@ -489,20 +489,25 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
 
     # Hair Colour (MC1R variants)
     elif trait == "Hair Colour":
-        alt_count = safe_alt_count(info["snps"])
-        if alt_count == 0:
-            return "Non-red hair"
-        elif alt_count == 1:
-            return "Auburn hair"
-        else:
+        # If any genotype is missing, be conservative and return Unknown
+        gts = [safe_gt(s) for s in info["snps"]]
+        if any(gt is None for gt in gts):
+            return "Unknown"
+        # True red only when all MC1R SNPs are homozygous ALT
+        if all(gt == [1, 1] for gt in gts):
             return "True red hair"
+        # Any ALT allele but not all homozygous -> auburn/intermediate
+        if any(gt.count(1) > 0 for gt in gts):
+            return "Auburn hair"
+        return "Non-red hair"
 
     # Eye Colour (HERC2 rs12913832)
     elif trait == "Eye Colour":
         gt = safe_gt(info["snps"][0])
         if gt is None:
             return "Unknown"
-        return "Blue eyes" if gt == [0, 0] else "Brown eyes"
+        # rs12913832 ALT (G) -> blue eyes. Blue = ALT/ALT (homozygous alt)
+        return "Blue eyes" if (gt[0] == 1 and gt[1] == 1) else "Brown eyes"
 
     # Skin Tone (SLC24A5 rs1426654)
     elif trait == "Skin Tone":
@@ -594,12 +599,13 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
         else:
             return "Strong taster"
 
-    # Coriander Taste (OR6A2 rs72921001)
+ # Coriander Taste (OR6A2 rs72921001) — treat as recessive
     elif trait == "Coriander Taste":
         gt = safe_gt(info["snps"][0])
         if gt is None:
             return "Unknown"
-        return "Soapy coriander perception" if 1 in gt else "Normal coriander perception"
+        # Recessive: only ALT/ALT perceives coriander as soapy
+        return "Soapy coriander perception" if (gt[0] == 1 and gt[1] == 1) else "Normal coriander perception"
 
 # Red-Green Colourblindness (OPN1LW/OPN1MW proxies)
     elif trait == "Red-Green Colourblindness":
@@ -608,12 +614,16 @@ def get_trait_summary(trait, info, vcf_obj=None, sample=None):
             return "Unknown"
         return "Red green colour blind" if 1 in gt else "Not red green colour blind"
 
-    # Alcohol Flush (ALDH2 rs671)
+    # Alcohol Flush (ALDH2 rs671) — distinguish het vs hom
     elif trait == "Alcohol Flush":
         gt = safe_gt(info["snps"][0])
         if gt is None:
             return "Unknown"
-        return "Alcohol flush reaction" if 1 in gt else "No flush reaction"
+        if (gt[0] == 1 and gt[1] == 1):
+            return "Alcohol flush (strong, homozygous)"
+        if 1 in gt:
+            return "Alcohol flush (mild, heterozygous)"
+        return "No flush reaction"
 
     # ---- Genetic Response to Drugs: Cardiology ----
 
@@ -1544,21 +1554,26 @@ if selected:
             else:
                 summary = "Pronounced freckling"
 
-        # Hair Colour: count ALT alleles
+        # Hair Colour: True red only if all MC1R SNPs are ALT/ALT; otherwise auburn if any ALT present
         elif trait == "Hair Colour":
-            alt_count = sum((get_genotype(s, "ind") or ([None], None))[0].count(1) if get_genotype(s, "ind") else 0 for s in info["snps"])
-            if alt_count == 0:
-                summary = "Non-red hair"
-            elif alt_count == 1:
+            gts = [ (get_genotype(s, "ind") or (None,))[0] for s in info["snps"] ]
+            if any(gt is None for gt in gts):
+                summary = "Unknown"
+            elif all(gt == [1,1] for gt in gts):
+                summary = "True red hair"
+            elif any(gt.count(1) > 0 for gt in gts):
                 summary = "Auburn hair"
             else:
-                summary = "True red hair"
+                summary = "Non-red hair"
 
-        # Eye Colour: G/G → blue, else brown
+        # Eye Colour: G/G (ALT/ALT) → blue, else brown
         elif trait == "Eye Colour":
             gtres = get_genotype(info["snps"][0], "ind")
             gt = gtres[0] if gtres else None
-            summary = "Blue eyes" if gt == [0, 0] else "Brown eyes"
+            if gt is None:
+                summary = "Unknown"
+            else:
+                summary = "Blue eyes" if (gt[0] == 1 and gt[1] == 1) else "Brown eyes"
 
         # Skin Tone: A/A → lighter, A/G → intermediate, G/G → darker
         elif trait == "Skin Tone":
@@ -1596,14 +1611,14 @@ if selected:
             alt_count = sum((get_genotype(s, "ind") or ([None], None))[0].count(1) if get_genotype(s, "ind") else 0 for s in info["snps"])
             summary = "Can taste PTC" if alt_count > 0 else "Cannot taste PTC"
     
-        # Coriander Taste
+        # Coriander Taste: recessive — ALT/ALT required to perceive as soapy
         elif trait == "Coriander Taste":
             gtres = get_genotype(info["snps"][0], "ind")
             gt = gtres[0] if gtres else None
             if gt is None:
                 summary = "Unknown"
             else:
-                summary = "Perceives coriander as soapy" if any(gt) else "Normal coriander taste"
+                summary = "Soapy coriander perception" if (gt[0] == 1 and gt[1] == 1) else "Normal coriander perception"
     
         # Red-Green Colourblindness
         elif trait == "Red-Green Colourblindness":
@@ -1625,14 +1640,19 @@ if selected:
                 summary = ("Sprint gene present: better sprint performance"
                            if sprint_present else "Sprint gene absent: reduced sprint")
     
-        # Alcohol Flush
+        # Alcohol Flush: heterozygous = mild flush; homozygous = strong flush
         elif trait == "Alcohol Flush":
             gtres = get_genotype(info["snps"][0], "ind")
             gt = gtres[0] if gtres else None
             if gt is None:
                 summary = "Unknown"
             else:
-                summary = "Alcohol flush present" if any(gt) else "Alcohol flush not present"
+                if (gt[0] == 1 and gt[1] == 1):
+                    summary = "Alcohol flush (strong, homozygous)"
+                elif 1 in gt:
+                    summary = "Alcohol flush (mild, heterozygous)"
+                else:
+                    summary = "Alcohol flush not present"
     
         # ── New Dermatology Traits ──
         elif trait == "Tanning Response":
